@@ -11,10 +11,8 @@ import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.HttpEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClientException;
-import org.springframework.http.HttpHeaders;
 
 import java.util.List;
-import java.util.Map;
 
 @Service
 @ConfigurationProperties(prefix = "api")
@@ -39,9 +37,9 @@ public class RoutesAPIConsumer {
      * @param originAddress The origin address
      * @param destinationAddress The destination address
      * @return The Route object containing the routes
-     * @throws RestClientException
+     * @throws RestClientException If there is an error getting the routes json
      */
-    public Route getRoutesJsonFromApi(String originAddress, String destinationAddress) throws RestClientException {
+    public Route getRoutesFromAPI(String originAddress, String destinationAddress) throws RestClientException {
         // Create the request body for the Directions API
         try {
             HttpEntity<String> entity = createRequestBodyPipeline.execute(List.of(originAddress, destinationAddress));

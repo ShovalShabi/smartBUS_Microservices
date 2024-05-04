@@ -55,6 +55,9 @@ dependencies {
     // Spring Boot Starter WebFlux for reactive web applications
     implementation 'org.springframework.boot:spring-boot-starter-webflux'
 
+    // Swagger-UI
+    implementation 'org.springdoc:springdoc-openapi-starter-webflux-ui:2.3.0'
+
     // Apache Kafka Streams for Kafka integration
 //    implementation 'org.apache.kafka:kafka-streams'
 
