@@ -3,6 +3,7 @@ package org.example.api;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.annotation.PostConstruct;
 import org.example.api.apiConstructionPipelines.Pipeline;
+import org.example.dto.Route;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -33,11 +34,19 @@ public class RoutesAPIConsumer {
         createRequestBodyPipeline = new Pipeline();
     }
 
-    public String getRoutesJsonFromApi(String originAddress, String destinationAddress) throws RestClientException {
+    /***
+     * Get routes json from the Directions API
+     * @param originAddress The origin address
+     * @param destinationAddress The destination address
+     * @return The Route object containing the routes
+     * @throws RestClientException
+     */
+    public Route getRoutesJsonFromApi(String originAddress, String destinationAddress) throws RestClientException {
         // Create the request body for the Directions API
         try {
             HttpEntity<String> entity = createRequestBodyPipeline.execute(List.of(originAddress, destinationAddress));
-            return restTemplateBuilder.build().postForObject(apiUrl, entity, String.class);
+            String stringMap = restTemplateBuilder.build().postForObject(apiUrl, entity, String.class);
+            return new ObjectMapper().readValue(stringMap, Route.class);
         } catch (Exception e) {
             throw new RuntimeException("Error getting routes json", e);
         }
