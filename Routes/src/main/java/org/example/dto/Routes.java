@@ -9,6 +9,6 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
-public class Leg {
-    private List<Step> steps;
+public class Routes {
+    private List<Route> routes;
 }

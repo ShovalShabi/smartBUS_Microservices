@@ -9,6 +9,8 @@ import lombok.NoArgsConstructor;
 @Data
 public class TransitDetails {
     private StopDetails stopDetails;
+    private LocalizedValues localizedValues;
     private String headsign;
     private TransitLine transitLine;
+    private int stopCount;
 }
