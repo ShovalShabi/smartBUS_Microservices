@@ -5,6 +5,7 @@ import jakarta.annotation.PostConstruct;
 import org.example.api.apiConstructionPipelines.Pipeline;
 import org.example.dto.Route;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.web.client.RestTemplateBuilder;
@@ -15,6 +16,7 @@ import org.springframework.web.client.RestClientException;
 import java.util.List;
 
 @Service
+@Qualifier("ApiConsumer")
 @ConfigurationProperties(prefix = "api")
 public class RoutesAPIConsumer {
     private final RestTemplateBuilder restTemplateBuilder;

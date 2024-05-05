@@ -5,16 +5,19 @@ import lombok.extern.slf4j.Slf4j;
 import org.example.api.RoutesAPIConsumer;
 import org.example.boundary.RouteRequest;
 import org.example.dto.Route;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
 import java.time.LocalDateTime;
 
 @Service
-@RequiredArgsConstructor
 @Slf4j
 public class RoutesApiServiceImpl implements RoutesApiService{
-    private final RoutesAPIConsumer apiConsumer;
+    @Autowired
+    @Qualifier("ApiConsumer")
+    private RoutesAPIConsumer apiConsumer;
 
     @Override
     public Mono<Route> getRouteFromApi(RouteRequest routeRequest) {
