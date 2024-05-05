@@ -5,5 +5,5 @@ import org.example.boundary.RouteResponse;
 import reactor.core.publisher.Flux;
 
 public interface RouteService {
-    public Flux<RouteResponse> getRoute(RouteRequest routeRequest);
+    public Flux<RouteResponse> getRoute(RouteRequest routeRequest, Boolean isSorted);
 }

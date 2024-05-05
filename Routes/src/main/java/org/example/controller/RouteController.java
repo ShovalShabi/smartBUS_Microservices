@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 
 @RestController
-@RequestMapping(path = "/api")
+@RequestMapping(path = "/route")
 public class RouteController {
     private final RouteService routeService;
 
@@ -17,9 +17,10 @@ public class RouteController {
         this.routeService = routeService;
     }
 
-    @PostMapping(
-            path = "/route")
-    public Flux<RouteResponse> createRouteRequest(@RequestBody RouteRequest routeRequest) {
-        return routeService.getRoute(routeRequest).log();
+    @PostMapping
+    public Flux<RouteResponse> createRouteRequest(
+            @RequestBody RouteRequest routeRequest,
+            @RequestParam(name = "sorted", required = false, defaultValue = "true") Boolean isSorted) {
+        return routeService.getRoute(routeRequest, isSorted);
     }
 }
