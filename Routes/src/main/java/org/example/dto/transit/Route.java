@@ -1,12 +1,14 @@
-package org.example.dto;
+package org.example.dto.transit;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
-public class Location {
-    private LatLng latLng;
+public class Route {
+    private List<Leg> legs;
 }

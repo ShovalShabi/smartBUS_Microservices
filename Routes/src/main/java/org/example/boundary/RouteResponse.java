@@ -16,6 +16,8 @@ import java.util.Map;
 public class RouteResponse {
     private String origin;
     private String destination;
+    private String initialDepartureTime;
+    private String finalArrivalTime;
     private String publishedTimestamp;
-    private List<Map<String, Object>> routeFlow;
+    private Map<String, Object> routeFlow;
 }

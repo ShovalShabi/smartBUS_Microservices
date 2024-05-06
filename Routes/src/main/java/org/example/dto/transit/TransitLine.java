@@ -1,4 +1,4 @@
-package org.example.dto;
+package org.example.dto.transit;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

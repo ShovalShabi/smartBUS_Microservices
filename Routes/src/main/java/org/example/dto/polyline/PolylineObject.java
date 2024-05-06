@@ -1,4 +1,4 @@
-package org.example.dto;
+package org.example.dto.polyline;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -9,6 +9,6 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
-public class Route {
-    private List<Leg> legs;
+public class PolylineObject {
+    private List<PolylineWrapper> routes;
 }

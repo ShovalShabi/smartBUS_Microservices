@@ -3,7 +3,8 @@ package org.example.logic;
 import lombok.extern.slf4j.Slf4j;
 import org.example.api.RoutesAPIConsumer;
 import org.example.boundary.RouteRequest;
-import org.example.dto.Routes;
+import org.example.dto.polyline.PolylineObject;
+import org.example.dto.transit.TransitObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -28,17 +29,33 @@ public class GoogleApiServiceImpl implements GoogleApiService{
      * @return The Route object containing the routes
      */
     @Override
-    public Mono<Routes> getRouteFromApi(RouteRequest routeRequest) {
+    public Mono<TransitObject> getTransitFromApi(RouteRequest routeRequest) {
         try {
             // Get the route from the API consumer
-            Routes newRoute = apiConsumer
-                    .getRoutesFromAPI(routeRequest);
+            TransitObject newRoute = apiConsumer
+                    .getTransitFromAPI(routeRequest);
 
             // Clean the new route object request
-            Mono<Routes> cleanedRoute = cleanNewObjectRequest(newRoute);
+            Mono<TransitObject> cleanedRoute = cleanNewObjectRequest(newRoute);
             log.info("Route received from API: {} At: {}",
                     routeRequest, LocalDateTime.now().toString());
             return cleanedRoute;
+        } catch (Exception e) {
+            log.error("Error getting route from API", e);
+            return Mono.error(e);
+        }
+    }
+
+    @Override
+    public Mono<PolylineObject> getPolylineFromApi(RouteRequest routeRequest) {
+        try {
+        // Get the route from the API consumer
+        PolylineObject newRoute = apiConsumer
+                .getPolylineFromAPI(routeRequest);
+
+        log.info("Route received from API: {} At: {}",
+                routeRequest, LocalDateTime.now().toString());
+        return Mono.just(newRoute);
         } catch (Exception e) {
             log.error("Error getting route from API", e);
             return Mono.error(e);
@@ -50,7 +67,7 @@ public class GoogleApiServiceImpl implements GoogleApiService{
      * @param newRoute The new route object
      * @return The JSON request body
      */
-    private Mono<Routes> cleanNewObjectRequest(Routes newRoute) {
+    private Mono<TransitObject> cleanNewObjectRequest(TransitObject newRoute) {
         // Remove null steps from the response
         newRoute.getRoutes().forEach(route -> {
             route.getLegs().forEach(leg -> {

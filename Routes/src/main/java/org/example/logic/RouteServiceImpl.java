@@ -1,106 +1,88 @@
 package org.example.logic;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import org.example.boundary.RouteRequest;
 import org.example.boundary.RouteResponse;
-import org.example.dto.*;
+import org.example.dto.polyline.LatLng;
+import org.example.dto.transit.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.util.function.Tuple2;
+import reactor.util.function.Tuples;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 
+import static org.example.utils.TimeMeasurement.getFinalArrivalTime;
+import static org.example.utils.TimeMeasurement.getInitialDepartureTime;
+import static org.example.utils.ZipMonoOfLists.zipMonoListOfLists;
+
 @Service
 @Slf4j
 public class RouteServiceImpl implements RouteService {
-    private final GoogleApiService googleApiService;
+    private final TransitService transitService;
+    private final PolylineService polylineService;
+    private ObjectMapper objectMapper;
+
+    @PostConstruct
+    public void init() {
+        objectMapper = new ObjectMapper();
+    }
 
     @Autowired
-    public RouteServiceImpl(GoogleApiService googleApiService) {
-        this.googleApiService = googleApiService;
+    public RouteServiceImpl(TransitService transitService, PolylineService polylineService) {
+        this.transitService = transitService;
+        this.polylineService = polylineService;
     }
 
     /**
-     * Get the route from the Google API
+     * Get the route for the given route request
      * @param routeRequest The route request to get the route for
-     * @param isSorted Whether the routes should be sorted
-     * @return A Flux of the route responses
+     * @param isSorted Whether to sort the route responses by departure time
+     * @return A Flux of route responses
      */
     @Override
     public Flux<RouteResponse> getRoute(RouteRequest routeRequest, Boolean isSorted) {
-        // Get the routes from the Google API
-        // Converting API Json to needed Boundary Object
-        Flux<RouteResponse> responses =
-                // Group the transit details by list of same Route
-                groupTransitDetailsByList(googleApiService.getRouteFromApi(routeRequest))
-                .flatMapMany(Flux::fromIterable)
-                 // Get the route responses from the grouped transit details
-                .flatMap(groupedTransitDetails -> getRouteResponse(groupedTransitDetails, routeRequest))
-                .doOnError(error -> log.error("Error getting routes", error))
-                .onErrorResume(error -> Flux.empty()); // Provide a fallback value in case of error
-
-        // Sort the responses if needed and return them
-        return isSorted ? sortedResponses(responses) : responses;
+        // Get the transit details and polylines
+        // Convert the tuple of transit details and polylines to a list of route responses
+        return getTransitDetailsAndPolylines(routeRequest)
+                .flatMapMany(tuple -> tupleToListOfRouteResponses(tuple, routeRequest))
+                .transformDeferred(responses -> isSorted ? sortedResponses(responses) : responses);
     }
 
     /**
-     * Get the route responses from the grouped transit details
-     * @param groupedTransitDetails The grouped transit details to get the route responses from
-     * @return A Mono of the route responses
+     * Convert the tuple of transit details and polylines to a list of route responses
+     * @param tuple The tuple of transit details and polylines
+     * @param routeRequest The route request to get the route responses for
+     * @return A list of route responses
      */
-    private Mono<RouteResponse> getRouteResponse(List<TransitDetails> groupedTransitDetails, RouteRequest routeRequest) {
-        return createRouteDetails(groupedTransitDetails)
-                .mapNotNull(routeDetails -> {
-                    try {
-                        return RouteResponse.builder()
-                                .routeFlow(routeDetails)
-                                .origin(routeRequest.getOriginAddress())
-                                .destination(routeRequest.getDestinationAddress())
-                                .publishedTimestamp(String.valueOf(LocalDateTime.now()))
-                                .build();
-                    } catch (Exception e) {
-                        log.error("Error creating route response", e);
-                        return null; // Provide a default value in case of error
-                    }
-                })
-                .doOnError(error -> log.error("Failed to create route response", error))
-                .onErrorResume(error -> Mono.error(new Exception("Failed to create route response", error)));
-    }
-
-    /**
-     * Get the steps from the legs and combine them into a single list
-     * @param routesMono The routes to get the steps from
-     * @return A Mono of the combined steps
-     */
-    private Mono<List<List<TransitDetails>>> groupTransitDetailsByList(Mono<Routes> routesMono) {
-        // Get the legs from the routes
-        Mono<List<Leg>> legsMono = combineRouteList(routesMono);
-
-        // Get the transit details from the steps and group them by leg
-        return legsMono.flatMap(legs -> {
-                    List<List<TransitDetails>> groupedTransitDetails = new ArrayList<>();
-                    try {
-                        for (Leg leg : legs) {
-                            List<TransitDetails> legTransitDetails =
-                                    leg.getSteps().stream()
-                                            .map(Step::getTransitDetails) // Get transit details for each step
-                                            .filter(Objects::nonNull) // Filter out null transit details lists
-                                            .toList(); // Collect into a list
-                            // Add the list of transit details to the grouped list
-                            groupedTransitDetails.add(legTransitDetails);
-                        }
-                        // Return the grouped transit details
-                        return Mono.just(groupedTransitDetails);
-                    } catch (Exception e) {
-                        log.error("Error grouping transit details by list", e);
-                        return Mono.error(e); // Propagate the exception
-                    }
-                })
-                .doOnError(error -> log.error("Failed to group transit details by list", error))
-                .onErrorResume(error -> Mono.just(List.of())); // Provide a fallback value in case of error
+    private Flux<RouteResponse> tupleToListOfRouteResponses(Tuple2<Mono<List<List<TransitDetails>>>, Mono<List<List<LatLng>>>> tuple,
+                                                            RouteRequest routeRequest) {
+        List<RouteResponse> routeResponses = new ArrayList<>();
+        var transitDetailsMono = tuple.getT1();
+        var latLngMono = tuple.getT2();
+        var zippedMono = zipMonoListOfLists(transitDetailsMono, latLngMono);
+        return zippedMono.flatMapMany(zippedLists ->
+                Flux.fromIterable(zippedLists)
+                        .map(innerTuple -> {
+                            List<TransitDetails> detailsList = innerTuple.getT1();
+                            List<LatLng> polylineList = innerTuple.getT2();
+                            return RouteResponse.builder()
+                                    .origin(routeRequest.getOriginAddress())
+                                    .destination(routeRequest.getDestinationAddress())
+                                    .publishedTimestamp(LocalDateTime.now().toString())
+                                    .initialDepartureTime(getInitialDepartureTime(detailsList))
+                                    .finalArrivalTime(getFinalArrivalTime(detailsList))
+                                    .routeFlow(Map.of("transitDetails", detailsList, "polyline", polylineList))
+                                    .build();
+                        })
+        );
     }
 
     /**
@@ -111,7 +93,7 @@ public class RouteServiceImpl implements RouteService {
     private Mono<List<Map<String, Object>>> createRouteDetails(List<TransitDetails> groupedTransitDetails) {
         try {
             // Construct the response
-            List<Map<String, Object>> routeFlow = new ArrayList<>();
+            List<Map<String, Object>> routeDetailsFlow = new ArrayList<>();
 
             // Add the needed details to the response list for each transit detail
             for (TransitDetails transitDetails : groupedTransitDetails) {
@@ -123,37 +105,14 @@ public class RouteServiceImpl implements RouteService {
                 neededDetails.put("stopCounts", transitDetails.getStopCount());
                 neededDetails.put("stopDetails", transitDetails.getStopDetails());
 
-                routeFlow.add(neededDetails);
+                routeDetailsFlow.add(neededDetails);
             }
 
-            return Mono.just(routeFlow);
+            return Mono.just(routeDetailsFlow);
         } catch (Exception e) {
             log.error("Error creating route details", e);
             return Mono.error(e); // Propagate the exception
         }
-    }
-
-    /**
-     * Get the legs from the routes and combine them into a single list
-     * @param routesMono The routes to get the legs from
-     * @return A Mono of the combined legs
-     */
-    private Mono<List<Leg>> combineRouteList(Mono<Routes> routesMono) {
-        return routesMono.flatMap(routes -> {
-                    try {
-                        // Get the legs from the routes as a Flux
-                        Flux<Leg> legsFlux = Flux.fromIterable(routes.getRoutes())
-                                .flatMapIterable(Route::getLegs); // Flatten the list of legs
-
-                        // Collect all legs into a single list
-                        return legsFlux.collectList();
-                    } catch (Exception e) {
-                        log.error("Error combining route list", e);
-                        return Mono.error(e); // Propagate the exception
-                    }
-                })
-                .doOnError(error -> log.error("Failed to combine route list", error))
-                .onErrorResume(error -> Mono.just(List.of())); // Provide a fallback value in case of error
     }
 
     /**
@@ -166,7 +125,7 @@ public class RouteServiceImpl implements RouteService {
         return routeResponses
                 .sort(Comparator.comparing(routeResponse -> {
                     try {
-                        String departureTime = routeResponse.getRouteFlow().get(0).get("departureTime").toString();
+                        String departureTime = routeResponse.getInitialDepartureTime();
                         return LocalDateTime.parse(departureTime, formatter);
                     } catch (Exception e) {
                         log.error("Error parsing departure time for route response: {}", routeResponse, e);
@@ -174,5 +133,16 @@ public class RouteServiceImpl implements RouteService {
                     }
                 }))
                 .doOnNext(routeResponse -> log.info("Sorted route response: {}", routeResponse));
+    }
+
+    /**
+     * Create the route details from the grouped transit details
+     * @param routeRequest The route request to get the route details for
+     * @return A Mono Tuple of the transit details and polylines
+     */
+    private Mono<Tuple2<Mono<List<List<TransitDetails>>>, Mono<List<List<LatLng>>>>> getTransitDetailsAndPolylines(RouteRequest routeRequest) {
+        var transitDetailsMono = transitService.getTransitDetails(routeRequest).cache();
+        var polylinesMono = polylineService.getPolyline(routeRequest).cache();
+        return transitDetailsMono.zipWith(polylinesMono, (transit, polylines) -> Tuples.of(Mono.just(transit), Mono.just(polylines)));
     }
 }

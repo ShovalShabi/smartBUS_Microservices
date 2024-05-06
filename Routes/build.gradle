@@ -81,6 +81,9 @@ dependencies {
 
     // Additional dependencies for testing
     testImplementation 'io.projectreactor:reactor-test'
+
+    // Google Maps Polyline decoding library
+    implementation 'com.google.maps:google-maps-services:2.2.0'
 }
 
 // Configure test task to use JUnit Platform

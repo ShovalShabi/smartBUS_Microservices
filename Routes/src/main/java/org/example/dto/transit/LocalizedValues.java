@@ -1,14 +1,13 @@
-package org.example.dto;
+package org.example.dto.transit;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.List;
-
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
-public class Routes {
-    private List<Route> routes;
+public class LocalizedValues {
+    private Time arrivalTime;
+    private Time departureTime;
 }

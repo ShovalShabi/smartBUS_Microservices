@@ -1,4 +1,4 @@
-package org.example.dto;
+package org.example.dto.polyline;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -7,7 +7,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
-public class Stop {
-    private String name;
-    private Location location;
+public class PolylineWrapper {
+    private Polyline polyline;
 }

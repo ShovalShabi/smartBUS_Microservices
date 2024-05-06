@@ -1,4 +1,4 @@
-package org.example.dto;
+package org.example.dto.transit;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -7,7 +7,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
-public class LocalizedValues {
-    private Time arrivalTime;
-    private Time departureTime;
+public class Step {
+    private TransitDetails transitDetails;
 }

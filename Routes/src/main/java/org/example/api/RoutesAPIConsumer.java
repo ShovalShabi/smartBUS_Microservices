@@ -2,8 +2,8 @@ package org.example.api;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.example.boundary.RouteRequest;
-import org.example.dto.Route;
-import org.example.dto.Routes;
+import org.example.dto.polyline.PolylineObject;
+import org.example.dto.transit.TransitObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -26,6 +26,7 @@ public class RoutesAPIConsumer {
     private final ApiHeadersProperties apiHeaders;
     @Value("${api.url}")
     private String apiUrl;
+    private enum apiType { TRANSIT, POLYLINE };
 
     @Autowired
     private RoutesAPIConsumer(RestTemplateBuilder restTemplateBuilder,
@@ -40,17 +41,37 @@ public class RoutesAPIConsumer {
      * @return The Route object containing the routes
      * @throws RestClientException If there is an error getting the routes json
      */
-    public Routes getRoutesFromAPI(RouteRequest routeRequest) throws RestClientException {
+    public TransitObject getTransitFromAPI(RouteRequest routeRequest) throws RestClientException {
         // Create the request body for the Directions API
         try {
             String originAddress = routeRequest.getOriginAddress();
             String destinationAddress = routeRequest.getDestinationAddress();
             String requestBody = createRequestBody(originAddress, destinationAddress);
-            HttpEntity<String> httpEntity = createHttpEntity(requestBody);
+            HttpEntity<String> httpEntity = createHttpEntity(requestBody, apiType.TRANSIT);
             return this.restTemplateBuilder.build()
-                    .postForObject(apiUrl, httpEntity, Routes.class);
+                    .postForObject(apiUrl, httpEntity, TransitObject.class);
         } catch (Exception e) {
-            throw new RuntimeException("Error getting routes json", e);
+            throw new RuntimeException("Error getting transit json", e);
+        }
+    }
+
+    /***
+     * Get polyline json from the Directions API
+     * @param routeRequest The RouteRequest object containing the origin and destination addresses
+     * @return The PolylineObject object containing the polyline
+     * @throws RestClientException If there is an error getting the polyline json
+     */
+    public PolylineObject getPolylineFromAPI(RouteRequest routeRequest) throws RestClientException {
+        // Create the request body for the Directions API
+        try {
+            String originAddress = routeRequest.getOriginAddress();
+            String destinationAddress = routeRequest.getDestinationAddress();
+            String requestBody = createRequestBody(originAddress, destinationAddress);
+            HttpEntity<String> httpEntity = createHttpEntity(requestBody, apiType.POLYLINE);
+            return this.restTemplateBuilder.build()
+                    .postForObject(apiUrl, httpEntity, PolylineObject.class);
+        } catch (Exception e) {
+            throw new RuntimeException("Error getting polyline json", e);
         }
     }
 
@@ -94,10 +115,11 @@ public class RoutesAPIConsumer {
      * @param body The body of the request
      * @return The HttpEntity object
      */
-    private HttpEntity<String> createHttpEntity(String body) {
+    private HttpEntity<String> createHttpEntity(String body, apiType type) {
         // Set headers for the API request and make the request to the API URL to get the JSON response
         HttpHeaders httpHeaders = new HttpHeaders();
-        Map<String, String> headers = apiHeaders.getHeaders();
+        Map<String, String> headers = (type == apiType.TRANSIT)
+                ? apiHeaders.getTransitHeaders() : apiHeaders.getPolylineHeaders();
         httpHeaders.setAll(headers);
         return new HttpEntity<String>(body, httpHeaders);
     }
