@@ -1,6 +1,5 @@
 package org.example.logic;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
@@ -12,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
 import reactor.util.function.Tuple2;
 import reactor.util.function.Tuples;
 
@@ -64,12 +64,12 @@ public class RouteServiceImpl implements RouteService {
      */
     private Flux<RouteResponse> tupleToListOfRouteResponses(Tuple2<Mono<List<List<TransitDetails>>>, Mono<List<List<LatLng>>>> tuple,
                                                             RouteRequest routeRequest) {
-        List<RouteResponse> routeResponses = new ArrayList<>();
         var transitDetailsMono = tuple.getT1();
         var latLngMono = tuple.getT2();
         var zippedMono = zipMonoListOfLists(transitDetailsMono, latLngMono);
         return zippedMono.flatMapMany(zippedLists ->
                 Flux.fromIterable(zippedLists)
+                        .publishOn(Schedulers.boundedElastic())
                         .map(innerTuple -> {
                             List<TransitDetails> detailsList = innerTuple.getT1();
                             List<LatLng> polylineList = innerTuple.getT2();
@@ -79,7 +79,10 @@ public class RouteServiceImpl implements RouteService {
                                     .publishedTimestamp(LocalDateTime.now().toString())
                                     .initialDepartureTime(getInitialDepartureTime(detailsList))
                                     .finalArrivalTime(getFinalArrivalTime(detailsList))
-                                    .routeFlow(Map.of("transitDetails", detailsList, "polyline", polylineList))
+                                    .routeFlow(new LinkedHashMap<>() {{
+                                        put("transitDetails", Objects.requireNonNull(createRouteDetails(detailsList).block()));
+                                        put("polyline", polylineList);
+                                    }})
                                     .build();
                         })
         );

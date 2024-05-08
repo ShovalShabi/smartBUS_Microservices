@@ -21,6 +21,11 @@ public class PolylineServiceImpl implements PolylineService {
         this.googleApiService = googleApiService;
     }
 
+    /**
+     * Retrieves the polyline from the Google Maps API.
+     * @param routeRequest RouteRequest object
+     * @return Mono of List of List of LatLng
+     */
     @Override
     public Mono<List<List<LatLng>>> getPolyline(RouteRequest routeRequest) {
         return groupPolylineByList(googleApiService.getPolylineFromApi(routeRequest))
@@ -28,6 +33,11 @@ public class PolylineServiceImpl implements PolylineService {
                 .doOnSuccess(polyline -> log.info("Successfully retrieved polyline"));
     }
 
+    /**
+     * Groups the decoded polylines by route.
+     * @param polyMono Mono of PolylineObject
+     * @return Mono of List of List of LatLng
+     */
     private Mono<List<List<LatLng>>> groupPolylineByList(Mono<PolylineObject> polyMono) {
         return polyMono.map(PolylineObject::getRoutes) // Extract routes
                 .flatMapMany(Flux::fromIterable) // Flatten the list of routes
