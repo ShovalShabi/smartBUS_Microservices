@@ -28,12 +28,6 @@ import static org.example.utils.ZipMonoOfLists.zipMonoListOfLists;
 public class RouteServiceImpl implements RouteService {
     private final TransitService transitService;
     private final PolylineService polylineService;
-    private ObjectMapper objectMapper;
-
-    @PostConstruct
-    public void init() {
-        objectMapper = new ObjectMapper();
-    }
 
     @Autowired
     public RouteServiceImpl(TransitService transitService, PolylineService polylineService) {
