@@ -32,7 +32,7 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-web'
 
     // PostgreSQL JDBC driver for connecting to PostgreSQL database
-    implementation 'org.postgresql:postgresql'
+//    implementation 'org.postgresql:postgresql'
 
     // Spring Boot Starter Data JPA for using Spring Data JPA with Hibernate
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
@@ -41,7 +41,7 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
 
     // Spring Boot Starter Security for authentication and authorization
-    implementation 'org.springframework.boot:spring-boot-starter-security'
+//    implementation 'org.springframework.boot:spring-boot-starter-security'
 
     // H2 Database for testing and development
     implementation 'com.h2database:h2'
@@ -50,10 +50,13 @@ dependencies {
 //    implementation 'org.springframework.boot:spring-boot-starter-data-r2dbc'
 
     // Spring Boot Starter for Reactive Redis support
-    implementation 'org.springframework.boot:spring-boot-starter-data-redis-reactive'
+//    implementation 'org.springframework.boot:spring-boot-starter-data-redis-reactive'
 
     // Spring Boot Starter WebFlux for reactive web applications
     implementation 'org.springframework.boot:spring-boot-starter-webflux'
+
+    // Swagger-UI
+    implementation 'org.springdoc:springdoc-openapi-starter-webflux-ui:2.3.0'
 
     // Apache Kafka Streams for Kafka integration
 //    implementation 'org.apache.kafka:kafka-streams'
@@ -65,7 +68,7 @@ dependencies {
 //    developmentOnly 'org.springframework.boot:spring-boot-docker-compose'
 
     // PostgreSQL JDBC driver for runtime
-    runtimeOnly 'org.postgresql:postgresql'
+//    runtimeOnly 'org.postgresql:postgresql'
 
     // R2DBC PostgreSQL driver for runtime
 //    runtimeOnly 'org.postgresql:r2dbc-postgresql'
@@ -78,6 +81,9 @@ dependencies {
 
     // Additional dependencies for testing
     testImplementation 'io.projectreactor:reactor-test'
+
+    // Google Maps Polyline decoding library
+    implementation 'com.google.maps:google-maps-services:2.2.0'
 }
 
 // Configure test task to use JUnit Platform
