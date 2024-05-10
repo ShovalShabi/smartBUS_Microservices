@@ -32,9 +32,6 @@ repositories {
 
 // Define project dependencies
 dependencies {
-    // Spring Boot Starter Web for building web applications
-    implementation 'org.springframework.boot:spring-boot-starter-web'
-
     // Spring Boot Starter Actuator for production-ready features
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
 
