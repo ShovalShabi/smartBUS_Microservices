@@ -14,6 +14,10 @@ java {
     sourceCompatibility = '17' // Java version compatibility
 }
 
+ext {
+    set('springCloudVersion', "2023.0.0")
+}
+
 // Configure build configurations
 configurations {
     compileOnly {
@@ -84,6 +88,12 @@ dependencies {
 
     // Google Maps Polyline decoding library
     implementation 'com.google.maps:google-maps-services:2.2.0'
+}
+
+dependencyManagement {
+    imports {
+        mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
+    }
 }
 
 // Configure test task to use JUnit Platform
