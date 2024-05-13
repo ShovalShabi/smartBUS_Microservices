@@ -32,4 +32,29 @@ public class GatewayConfig {
             return null;
         }
     }
+
+//    @Bean
+//    public RouteLocator myRoutes(RouteLocatorBuilder builder) {
+//        return builder.routes()
+//                .routes(route -> routeConfig.getRoutes().stream()
+//                        .map(route -> route.route(r ->
+//                                r.path(route.getPath())
+//                                        .filters(f -> f.rewritePath(route.getPath(), "/"))
+//                                        .uri(route.getUrl())
+//                                        .predicate(this::checkOrigin)
+//                        )).toArray()
+//                )
+//                .build();
+//    }
+//
+//    private Mono<Boolean> checkOrigin(ServerWebExchange exchange) {
+//        // Get the request's origin URL
+//        String origin = exchange.getRequest().getHeaders().getOrigin();
+//
+//        // Check if the origin matches the allowed URL
+//        boolean isAllowedOrigin = "http://192.0.0.1:5000".equals(origin);
+//
+//        // Return a Mono indicating whether the request is allowed from the specified origin
+//        return Mono.just(isAllowedOrigin);
+//    }
 }
