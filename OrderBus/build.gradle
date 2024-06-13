@@ -8,6 +8,7 @@ plugins {
 // Define project details
 group = 'com.example' // Group ID for the project
 version = '0.0.1-SNAPSHOT' // Version of the project
+archivesBaseName='orderbus' // Base name of the project
 
 // Set Java source compatibility
 java {
@@ -35,22 +36,22 @@ dependencies {
     implementation 'org.postgresql:postgresql'
 
     // Spring Boot Starter Data JPA for using Spring Data JPA with Hibernate
-    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    //implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 
     // Spring Boot Starter Actuator for production-ready features
-    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+    //implementation 'org.springframework.boot:spring-boot-starter-actuator'
 
     // Spring Boot Starter Security for authentication and authorization
-    implementation 'org.springframework.boot:spring-boot-starter-security'
+    //implementation 'org.springframework.boot:spring-boot-starter-security'
 
     // H2 Database for testing and development
-    implementation 'com.h2database:h2'
+    //implementation 'com.h2database:h2'
 
     // Spring Boot Starter for R2DBC support
-//    implementation 'org.springframework.boot:spring-boot-starter-data-r2dbc'
+    // implementation 'org.springframework.boot:spring-boot-starter-data-r2dbc'
 
     // Spring Boot Starter for Reactive Redis support
-    implementation 'org.springframework.boot:spring-boot-starter-data-redis-reactive'
+    //implementation 'org.springframework.boot:spring-boot-starter-data-redis-reactive'
 
     // Spring Boot Starter WebFlux for reactive web applications
     implementation 'org.springframework.boot:spring-boot-starter-webflux'
@@ -62,13 +63,13 @@ dependencies {
     compileOnly 'org.projectlombok:lombok'
 
     // Development-only dependency for Docker Compose support
-//    developmentOnly 'org.springframework.boot:spring-boot-docker-compose'
+    developmentOnly 'org.springframework.boot:spring-boot-docker-compose'
 
     // PostgreSQL JDBC driver for runtime
     runtimeOnly 'org.postgresql:postgresql'
 
     // R2DBC PostgreSQL driver for runtime
-//    runtimeOnly 'org.postgresql:r2dbc-postgresql'
+    // runtimeOnly 'org.postgresql:r2dbc-postgresql'
 
     // Lombok annotation processor for compile time
     annotationProcessor 'org.projectlombok:lombok'

@@ -1,6 +1,5 @@
 package org.example.controller;
 
-import com.netflix.discovery.EurekaClient;
 import org.example.boundary.RouteRequest;
 import org.example.boundary.RouteResponse;
 import org.example.logic.RouteService;
@@ -12,9 +11,6 @@ import reactor.core.publisher.Flux;
 @RequestMapping(path = "/route")
 public class RouteController {
     private final RouteService routeService;
-
-    @Autowired
-    private EurekaClient eurekaClient;
 
     @Autowired
     public RouteController(RouteService routeService) {

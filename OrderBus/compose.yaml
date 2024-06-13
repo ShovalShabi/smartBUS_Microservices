@@ -1,0 +1,43 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:13
+    environment:
+      POSTGRES_DB: OrderBusDB
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: Ss123456
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  init_db:
+    build:
+      context: ./init_db
+      args:
+        GIT_REPO_URL: 'https://github.com/tamir303/GtfsScript.git'
+    environment:
+      POSTGRES_DB: OrderBusDB
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: Ss123456
+      POSTGRES_HOST: db
+      POSTGRES_PORT: 5432
+    depends_on:
+      - db
+
+  app:
+    build: .
+    ports:
+      - "10093:10093"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/OrderBusDB
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: Ss123456
+      SPRING_PROFILES_ACTIVE: default,generate-messages
+    depends_on:
+      - db
+      - init_db
+
+volumes:
+  pgdata:

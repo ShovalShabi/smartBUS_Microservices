@@ -100,7 +100,7 @@ public class RoutesAPIConsumer {
         requestBody.put("travelMode", "TRANSIT");
         requestBody.put("transitPreferences", transitPreferences);
         requestBody.put("computeAlternativeRoutes", true);
-        requestBody.put("languageCode", "en-US");
+        requestBody.put("languageCode", "iw");
 
         try {
             // Convert the request body to a JSON string
