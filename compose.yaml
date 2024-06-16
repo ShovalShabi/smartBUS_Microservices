@@ -15,7 +15,7 @@ services:
 
   init_db:
     build:
-      context: OrderBus/init_db
+      context: ./OrderBus/init_db
       args:
         GIT_REPO_URL: 'https://github.com/tamir303/GtfsScript.git'
     environment:
