@@ -3,5 +3,5 @@
 database: OrderBusDB
 user: postgres
 password: Ss123456
-host: localhost
+host: db
 port: 5432
