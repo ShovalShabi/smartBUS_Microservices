@@ -2,19 +2,20 @@ version: '3.8'
 
 services:
   db:
-    image: postgres:13
+    image: postgres:12-alpine
+    restart: always
     environment:
-      POSTGRES_DB: OrderBusDB
-      POSTGRES_USER: postgres
       POSTGRES_PASSWORD: Ss123456
+      POSTGRES_USER: postgres
+      POSTGRES_DB: OrderBusDB
     ports:
       - "5432:5432"
-    volumes:
-      - pgdata:/var/lib/postgresql/data
+    networks:
+      - my-network
 
   init_db:
     build:
-      context: ./init_db
+      context: OrderBus/init_db
       args:
         GIT_REPO_URL: 'https://github.com/tamir303/GtfsScript.git'
     environment:
@@ -27,7 +28,8 @@ services:
       - db
 
   app:
-    build: .
+    build:
+      context: ./OrderBus
     ports:
       - "10093:10093"
     environment:
@@ -38,6 +40,9 @@ services:
     depends_on:
       - db
       - init_db
+    networks:
+      - my-network
 
-volumes:
-  pgdata:
+networks:
+  my-network:
+    driver: bridge
