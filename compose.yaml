@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   db:
-    image: postgres:12-alpine
+    image: postgres:latest
     restart: always
     environment:
       POSTGRES_PASSWORD: Ss123456
@@ -10,8 +10,6 @@ services:
       POSTGRES_DB: OrderBusDB
     ports:
       - "5432:5432"
-    networks:
-      - my-network
 
   init_db:
     build:
@@ -40,9 +38,5 @@ services:
     depends_on:
       - db
       - init_db
-    networks:
-      - my-network
-
-networks:
-  my-network:
-    driver: bridge
+    links:
+      - db

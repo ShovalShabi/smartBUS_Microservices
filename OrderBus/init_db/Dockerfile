@@ -19,6 +19,9 @@ RUN apt-get update && apt-get install -y build-essential
 # Copy the requirements file from the cloned repository
 COPY --from=clone_stage /repo/requirements.txt ./
 
+# Copy the configuration file from the cloned repository
+COPY gtfs_configuration.yaml config.yaml
+
 # Install any needed packages specified in requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
 
@@ -26,4 +29,4 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY --from=clone_stage /repo /usr/src/app
 
 # Define the command to run your application
-CMD ["python", "main.py", "--config", "config/config.yaml"]
+CMD ["python", "main.py", "--config", "config.yaml"]
