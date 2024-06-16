@@ -19,8 +19,5 @@ WORKDIR /app
 # Copy the built JAR file from the build stage
 COPY --from=builder /home/gradle/src/build/libs/orderbus-0.0.1-SNAPSHOT.jar /app/app.jar
 
-# Expose the port your application will run on
-EXPOSE 10093
-
 # Run the application
 ENTRYPOINT ["java", "-jar", "app.jar"]

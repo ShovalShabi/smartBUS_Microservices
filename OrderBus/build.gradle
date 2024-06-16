@@ -48,7 +48,7 @@ dependencies {
     //implementation 'com.h2database:h2'
 
     // Spring Boot Starter for R2DBC support
-    // implementation 'org.springframework.boot:spring-boot-starter-data-r2dbc'
+    implementation 'org.springframework.boot:spring-boot-starter-data-r2dbc'
 
     // Spring Boot Starter for Reactive Redis support
     //implementation 'org.springframework.boot:spring-boot-starter-data-redis-reactive'
@@ -69,7 +69,7 @@ dependencies {
     runtimeOnly 'org.postgresql:postgresql'
 
     // R2DBC PostgreSQL driver for runtime
-    // runtimeOnly 'org.postgresql:r2dbc-postgresql'
+    runtimeOnly 'org.postgresql:r2dbc-postgresql'
 
     // Lombok annotation processor for compile time
     annotationProcessor 'org.projectlombok:lombok'
