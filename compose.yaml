@@ -1,8 +1,9 @@
 version: '3.8'
 
 services:
-  db:
+  orderbus_db:
     image: postgres:latest
+    container_name: orderbus_db
     environment:
       POSTGRES_PASSWORD: Ss123456
       POSTGRES_USER: postgres
@@ -10,7 +11,8 @@ services:
     ports:
       - "5432:5432"
 
-  init_db:
+  init_orderbus_db:
+    container_name: init_orderbus_db
     build:
       context: ./OrderBus/init_db
       args:
@@ -22,20 +24,21 @@ services:
       POSTGRES_HOST: db
       POSTGRES_PORT: 5432
     depends_on:
-      - db
+      - orderbus_db
 
-  app:
+  orderbus_app:
+    container_name: orderbus_app
     build:
       context: ./OrderBus
     ports:
-      - "10093:10093"
+      - "8080:10093"
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/OrderBusDB
       SPRING_DATASOURCE_USERNAME: postgres
       SPRING_DATASOURCE_PASSWORD: Ss123456
       SPRING_PROFILES_ACTIVE: default,generate-messages
     depends_on:
-      - db
-      - init_db
+      - orderbus_db
+      - init_orderbus_db
     links:
-      - db
+      - orderbus_db

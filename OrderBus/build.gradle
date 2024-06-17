@@ -36,7 +36,7 @@ dependencies {
     implementation 'org.postgresql:postgresql'
 
     // Spring Boot Starter Data JPA for using Spring Data JPA with Hibernate
-    //implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 
     // Spring Boot Starter Actuator for production-ready features
     //implementation 'org.springframework.boot:spring-boot-starter-actuator'
@@ -63,7 +63,7 @@ dependencies {
     compileOnly 'org.projectlombok:lombok'
 
     // Development-only dependency for Docker Compose support
-    developmentOnly 'org.springframework.boot:spring-boot-docker-compose'
+    //developmentOnly 'org.springframework.boot:spring-boot-docker-compose'
 
     // PostgreSQL JDBC driver for runtime
     runtimeOnly 'org.postgresql:postgresql'
