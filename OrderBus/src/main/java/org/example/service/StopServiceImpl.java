@@ -4,20 +4,15 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.example.dal.LineStopRepository;
 import org.example.data.LineStopEntity;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 
 @Service
 @Slf4j
+@RequiredArgsConstructor
 public class StopServiceImpl implements StopService {
-    private LineStopRepository lineStopCrud;
-
-    @Autowired
-    public StopServiceImpl(LineStopRepository lineStopCrud) {
-        this.lineStopCrud = lineStopCrud;
-    }
+    private final LineStopRepository lineStopCrud;
 
     @Override
     public Flux<LineStopEntity> getAll(int size, int page) {

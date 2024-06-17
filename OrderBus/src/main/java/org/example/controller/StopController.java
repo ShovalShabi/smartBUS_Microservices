@@ -3,7 +3,6 @@ package org.example.controller;
 import lombok.RequiredArgsConstructor;
 import org.example.data.LineStopEntity;
 import org.example.service.StopService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -15,15 +14,11 @@ import static org.example.utils.Constants.DEFAULT_PAGE_SIZE;
 
 @RestController
 @RequestMapping(path = "/stops")
+@RequiredArgsConstructor
 public class StopController {
-    private StopService stopService;
+    private final StopService stopService;
 
-    @Autowired
-    public StopController(StopService stopService) {
-        this.stopService = stopService;
-    }
-
-    @GetMapping(produces = "application/stream+json")
+    @GetMapping(produces = "application/json")
     public Flux<LineStopEntity> getAllStops(
             @RequestParam(name = "size", required = false, defaultValue = DEFAULT_PAGE_SIZE) int size,
             @RequestParam(name = "page", required = false, defaultValue = DEFAULT_PAGE) int page) {
