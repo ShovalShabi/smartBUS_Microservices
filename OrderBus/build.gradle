@@ -29,23 +29,11 @@ repositories {
 
 // Define project dependencies
 dependencies {
-    // Spring Boot Starter Web for building web applications
-    implementation 'org.springframework.boot:spring-boot-starter-web'
+    // Spring Boot Starter WebFlux for reactive web applications
+    implementation 'org.springframework.boot:spring-boot-starter-webflux'
 
     // PostgreSQL JDBC driver for connecting to PostgreSQL database
     implementation 'org.postgresql:postgresql'
-
-    // Spring Boot Starter Data JPA for using Spring Data JPA with Hibernate
-    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-
-    // Spring Boot Starter Actuator for production-ready features
-    //implementation 'org.springframework.boot:spring-boot-starter-actuator'
-
-    // Spring Boot Starter Security for authentication and authorization
-    //implementation 'org.springframework.boot:spring-boot-starter-security'
-
-    // H2 Database for testing and development
-    //implementation 'com.h2database:h2'
 
     // Spring Boot Starter for R2DBC support
     implementation 'org.springframework.boot:spring-boot-starter-data-r2dbc'
@@ -53,17 +41,15 @@ dependencies {
     // Spring Boot Starter for Reactive Redis support
     //implementation 'org.springframework.boot:spring-boot-starter-data-redis-reactive'
 
-    // Spring Boot Starter WebFlux for reactive web applications
-    implementation 'org.springframework.boot:spring-boot-starter-webflux'
-
-    // Apache Kafka Streams for Kafka integration
-//    implementation 'org.apache.kafka:kafka-streams'
-
     // Lombok for reducing boilerplate code
     compileOnly 'org.projectlombok:lombok'
 
     // Development-only dependency for Docker Compose support
     //developmentOnly 'org.springframework.boot:spring-boot-docker-compose'
+
+    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.0.2'
+
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
 
     // PostgreSQL JDBC driver for runtime
     runtimeOnly 'org.postgresql:postgresql'

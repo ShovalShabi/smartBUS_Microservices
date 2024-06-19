@@ -1,18 +1,13 @@
 package org.example.data;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.IdClass;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.data.annotation.Id;
 import org.springframework.data.relational.core.mapping.Column;
 import org.springframework.data.relational.core.mapping.Table;
 
-@Entity
-@IdClass(StopId.class)
 @Table("line_stops")
-
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
