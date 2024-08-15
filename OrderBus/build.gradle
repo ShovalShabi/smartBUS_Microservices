@@ -51,6 +51,8 @@ dependencies {
 
     implementation 'org.springframework.boot:spring-boot-starter-validation'
 
+    implementation 'jakarta.persistence:jakarta.persistence-api:3.0.0'
+
     // PostgreSQL JDBC driver for runtime
     runtimeOnly 'org.postgresql:postgresql'
 

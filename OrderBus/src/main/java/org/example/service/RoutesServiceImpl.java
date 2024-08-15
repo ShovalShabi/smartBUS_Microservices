@@ -93,7 +93,8 @@ public class RoutesServiceImpl implements RoutesService {
         Mono<LineStopEntity> originMono = lineStopCrud.findByLineNumberAndStopName(lineNumber, origin)
                 .switchIfEmpty(Mono.error(new RuntimeException("Origin stop not found")));
 
-        Mono<LineStopEntity> destinationMono = lineStopCrud.findByLineNumberAndStopName(lineNumber, destination)
+        Mono<LineStopEntity> destinationMono =
+                lineStopCrud.findByLineNumberAndStopName(lineNumber, destination)
                 .switchIfEmpty(Mono.error(new RuntimeException("Destination stop not found")));
 
         // Combine origin and destination stops, then fetch stops between them
