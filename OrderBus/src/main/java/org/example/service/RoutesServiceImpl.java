@@ -8,7 +8,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.example.boundaries.routes.RouteResponse;
 import org.example.boundaries.stops.StopsRequest;
 import org.example.dal.LineStopRepository;
-import org.example.data.LineStopEntity;
 import org.example.dto.transit.Station;
 import org.example.dto.transit.TransitDetails;
 import org.springframework.stereotype.Service;
@@ -19,16 +18,14 @@ import reactor.core.publisher.Mono;
 import java.util.List;
 import java.util.Optional;
 
-import static org.example.utils.ConvertEntityToDto.convertLineStopToStation;
-
+import static org.example.utils.Constants.*;
 
 @Service
 @Slf4j
 @RequiredArgsConstructor
 public class RoutesServiceImpl implements RoutesService {
     private final WebClient.Builder webClientBuilder;
-    private final LineStopRepository lineStopCrud;
-    private final LineStopRepository lineStopRepository;
+    private final BusService busService;
     private ObjectMapper objectMapper;
 
     @PostConstruct
@@ -36,6 +33,27 @@ public class RoutesServiceImpl implements RoutesService {
         this.objectMapper = new ObjectMapper();
     }
 
+    /**
+     * Retrieves routes and includes intermediate stations between the origin and destination for each transit detail.
+     *
+     * <p>This method fetches route details and then processes each transit detail to retrieve the intermediate
+     * stations between the specified origin and destination stations. The intermediate stations are then added
+     * to the corresponding transit details.</p>
+     *
+     * <p>The process includes:</p>
+     * <ul>
+     *   <li>Fetching route details using the {@link #fetchRoutes(StopsRequest)} method.</li>
+     *   <li>Extracting the transit details from the response and converting them from a {@code Map<String, Object>}
+     *       to a {@code List<TransitDetails>}.</li>
+     *   <li>For each transit detail, retrieving the intermediate stations between the origin and destination using
+     *       the {@link #getStationsBetweenInTransit(String, String, String)} method.</li>
+     *   <li>Updating the transit details with the list of intermediate stations.</li>
+     *   <li>Returning the updated route response.</li>
+     * </ul>
+     *
+     * @param stopsRequest the request containing information about the stops for which routes need to be fetched
+     * @return a {@link Flux<RouteResponse>} containing the route details with intermediate stations included
+     */
     @Override
     public Flux<RouteResponse> getRoutesWithIntermediateStations(StopsRequest stopsRequest) {
         return fetchRoutes(stopsRequest)
@@ -53,9 +71,9 @@ public class RoutesServiceImpl implements RoutesService {
                                 String destinationStation = transitDetail.getStopDetails().getArrivalStop().getName();
 
                                 // Get all intermediate stations of a transit and convert them into a list of dto.Station
-                                Mono<List<Station>> intermediateStationsMono = convertLineStopToStation(
+                                Mono<List<Station>> intermediateStationsMono =
                                         getStationsBetweenInTransit(lineNumber, originStation, destinationStation)
-                                ).collectList();
+                                        .collectList();
 
                                 // Update the stop details with the list of stations
                                 return intermediateStationsMono.map(intermediateStations -> {
@@ -71,9 +89,19 @@ public class RoutesServiceImpl implements RoutesService {
                 });
     }
 
-
-    @Override
-    public Flux<RouteResponse> fetchRoutes(StopsRequest stopsRequest) {
+    /**
+     * Fetches routes based on the provided stops request.
+     *
+     * <p>This method sends a POST request to an external service to fetch route details based on the given
+     * stops request. The response is then processed into a {@link Flux<RouteResponse>}.</p>
+     *
+     * <p>Logging is performed to track the start and completion of the request, as well as any errors that
+     * might occur during the request.</p>
+     *
+     * @param stopsRequest the request containing the route information to be fetched
+     * @return a {@link Flux<RouteResponse>} containing the route details
+     */
+    private Flux<RouteResponse> fetchRoutes(StopsRequest stopsRequest) {
         log.info("Fetching routes for stops: {}", stopsRequest);
 
         try {
@@ -90,40 +118,19 @@ public class RoutesServiceImpl implements RoutesService {
         }
     }
 
-    private Flux<LineStopEntity> getStationsBetweenInTransit(String lineNumber, String origin, String destination) {
-        String finalLineNumber = "89";
-        origin = "שדרות קוגל/הלוחמים";
-        destination = "דרך נמיר/יהודה המכבי";
-        Mono<LineStopEntity> originMono =
-                lineStopCrud.findByLineNumberAndStopName(finalLineNumber, origin)
-                .switchIfEmpty(Mono.error(new RuntimeException("Origin stop not found")));
-
-        Mono<LineStopEntity> destinationMono =
-                lineStopCrud.findByLineNumberAndStopName(finalLineNumber, destination)
-                .switchIfEmpty(Mono.error(new RuntimeException("Destination stop not found")));
-
-        // Combine origin and destination stops, then fetch stops between them
-        return Mono.zip(originMono, destinationMono)
-                .flatMapMany(tuple -> {
-                    LineStopEntity originStop = tuple.getT1();
-                    LineStopEntity destinationStop = tuple.getT2();
-
-                    // Fetch stops between origin and destination stop names
-                    Flux<LineStopEntity> stops = lineStopRepository.findLineStopEntitiesByLineNumber(finalLineNumber)
-                            .collectList()
-                            .flatMapMany(stopsList -> {
-
-                                // If origin is found and there are enough stations
-                                if (!stopsList.isEmpty()) {
-                                    List<LineStopEntity> result = stopsList.subList(originStop.getStopOrder() + 1, destinationStop.getStopOrder() - 1);
-                                    return Flux.fromIterable(result);
-                                }
-
-                                // Return an empty Flux if the origin stop is not found
-                                return Flux.empty();
-                            });
-
-                    return stops;
-                });
+    /**
+     * Retrieves intermediate stations between the origin and destination for a given bus line.
+     *
+     * <p>This method leverages the {@link BusService#getBusLineStations(String, String, String, int, int)} method
+     * to fetch stations between the specified origin and destination stations for a given bus line. The method
+     * also applies default pagination settings.</p>
+     *
+     * @param lineNumber  the line number of the bus route
+     * @param origin      the name of the origin station
+     * @param destination the name of the destination station
+     * @return a {@link Flux<Station>} containing the stations between the origin and destination stations
+     */
+    private Flux<Station> getStationsBetweenInTransit(String lineNumber, String origin, String destination) {
+        return busService.getBusLineStations(lineNumber, origin, destination, Integer.parseInt(DEFAULT_PAGE_SIZE), Integer.parseInt(DEFAULT_PAGE));
     }
 }
