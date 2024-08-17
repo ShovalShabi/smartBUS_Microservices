@@ -8,7 +8,7 @@ plugins {
 // Define project details
 group = 'com.example' // Group ID for the project
 version = '0.0.1-SNAPSHOT' // Version of the project
-archivesBaseName='orderbus' // Base name of the project
+archivesBaseName = 'orderbus' // Base name of the project
 
 // Set Java source compatibility
 java {
@@ -38,8 +38,8 @@ dependencies {
     // Spring Boot Starter for R2DBC support
     implementation 'org.springframework.boot:spring-boot-starter-data-r2dbc'
 
-    // Spring Boot Starter for Reactive Redis support
-    //implementation 'org.springframework.boot:spring-boot-starter-data-redis-reactive'
+    // WebSocket support
+    implementation 'org.springframework.boot:spring-boot-starter-websocket'
 
     // Lombok for reducing boilerplate code
     compileOnly 'org.projectlombok:lombok'
