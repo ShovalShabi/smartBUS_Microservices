@@ -28,6 +28,7 @@ import static org.example.utils.ConvertEntityToDto.convertLineStopToStation;
 public class RoutesServiceImpl implements RoutesService {
     private final WebClient.Builder webClientBuilder;
     private final LineStopRepository lineStopCrud;
+    private final LineStopRepository lineStopRepository;
     private ObjectMapper objectMapper;
 
     @PostConstruct
@@ -90,11 +91,15 @@ public class RoutesServiceImpl implements RoutesService {
     }
 
     private Flux<LineStopEntity> getStationsBetweenInTransit(String lineNumber, String origin, String destination) {
-        Mono<LineStopEntity> originMono = lineStopCrud.findByLineNumberAndStopName(lineNumber, origin)
+        String finalLineNumber = "89";
+        origin = "שדרות קוגל/הלוחמים";
+        destination = "דרך נמיר/יהודה המכבי";
+        Mono<LineStopEntity> originMono =
+                lineStopCrud.findByLineNumberAndStopName(finalLineNumber, origin)
                 .switchIfEmpty(Mono.error(new RuntimeException("Origin stop not found")));
 
         Mono<LineStopEntity> destinationMono =
-                lineStopCrud.findByLineNumberAndStopName(lineNumber, destination)
+                lineStopCrud.findByLineNumberAndStopName(finalLineNumber, destination)
                 .switchIfEmpty(Mono.error(new RuntimeException("Destination stop not found")));
 
         // Combine origin and destination stops, then fetch stops between them
@@ -104,10 +109,21 @@ public class RoutesServiceImpl implements RoutesService {
                     LineStopEntity destinationStop = tuple.getT2();
 
                     // Fetch stops between origin and destination stop names
-                    return lineStopCrud.findStopsBetweenOriginAndDestination(
-                            lineNumber,
-                            originStop.getStopName(),
-                            destinationStop.getStopName());
+                    Flux<LineStopEntity> stops = lineStopRepository.findLineStopEntitiesByLineNumber(finalLineNumber)
+                            .collectList()
+                            .flatMapMany(stopsList -> {
+
+                                // If origin is found and there are enough stations
+                                if (!stopsList.isEmpty()) {
+                                    List<LineStopEntity> result = stopsList.subList(originStop.getStopOrder() + 1, destinationStop.getStopOrder() - 1);
+                                    return Flux.fromIterable(result);
+                                }
+
+                                // Return an empty Flux if the origin stop is not found
+                                return Flux.empty();
+                            });
+
+                    return stops;
                 });
     }
 }
