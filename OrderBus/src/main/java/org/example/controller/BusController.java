@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.example.data.LineStopEntity;
 import org.example.dto.transit.Station;
 import org.example.service.BusService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 
@@ -15,6 +16,8 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 @RequestMapping(path = "/bus")
 @RequiredArgsConstructor
 public class BusController {
+
+    @Autowired
     private final BusService busService;
 
     @GetMapping(

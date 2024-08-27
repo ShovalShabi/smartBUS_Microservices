@@ -3,9 +3,8 @@ package org.example.controller;
 import lombok.RequiredArgsConstructor;
 import org.example.boundaries.stops.StopsRequest;
 import org.example.boundaries.stops.StopsResponse;
-import org.example.data.LineStopEntity;
 import org.example.service.StopService;
-import org.springframework.boot.web.client.RestTemplateBuilder;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 
@@ -17,6 +16,8 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 @RequestMapping(path = "/stops")
 @RequiredArgsConstructor
 public class StopController {
+
+    @Autowired
     private final StopService stopService;
 
     @PostMapping(produces = APPLICATION_JSON_VALUE)
