@@ -41,6 +41,10 @@ dependencies {
     // WebSocket support
     implementation 'org.springframework.boot:spring-boot-starter-websocket'
 
+    // Spring Data Redis
+    implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+    implementation 'org.springframework.boot:spring-boot-starter-data-redis-reactive'
+
     // Lombok for reducing boilerplate code
     compileOnly 'org.projectlombok:lombok'
 
