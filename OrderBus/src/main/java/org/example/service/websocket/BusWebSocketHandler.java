@@ -1,20 +1,17 @@
 package org.example.service.websocket;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.example.boundaries.websocket.messages.WebSocketMessageBoundary;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.WebSocketMessage;
 import org.springframework.web.socket.WebSocketSession;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Map;
 import java.util.Objects;
-
-import static org.example.utils.Constants.DRIVER_CONSOLE_CLIENT;
-import static org.example.utils.Constants.ORDER_BUS_CLIENT;
 
 @Slf4j
 @Component
@@ -32,15 +29,8 @@ public class BusWebSocketHandler implements WebSocketHandler {
     @Override
     public void afterConnectionEstablished(WebSocketSession session) {
         try {
-            String clientType = getClientTypeFromSession(session);
-            if ((!ORDER_BUS_CLIENT.equals(clientType) && !DRIVER_CONSOLE_CLIENT.equals(clientType))) {
-                log.error("Invalid or missing client type in the WebSocket connection");
-                session.close(CloseStatus.BAD_DATA);
-                return;
-            }
-
-            sessionManager.connectAndAddSession(session, clientType);
-            log.info("WebSocket connection {} established for clientType {}", session.getId(), clientType);
+            sessionManager.connectAndAddSession(session);
+            log.info("WebSocket connection {} established", session.getId());
         } catch (Exception e) {
             log.error("Failed to establish WebSocket connection: {}", e.getMessage());
         }
@@ -66,8 +56,7 @@ public class BusWebSocketHandler implements WebSocketHandler {
     @Override
     public void handleTransportError(WebSocketSession session, Throwable exception) {
         try {
-            String clientType = getClientTypeFromSession(session);
-            sessionManager.closeAndRemoveSession(session, clientType);
+            sessionManager.closeAndRemoveSession(session);
             log.error("Transport error: {}", exception.getMessage());
         } catch (Exception e) {
             log.error("Failed to handle transport error: {}", e.getMessage());
@@ -77,8 +66,7 @@ public class BusWebSocketHandler implements WebSocketHandler {
     @Override
     public void afterConnectionClosed(WebSocketSession session, CloseStatus closeStatus) {
         try {
-            String clientType = getClientTypeFromSession(session);
-            sessionManager.closeAndRemoveSession(session, clientType);
+            sessionManager.closeAndRemoveSession(session);
             log.info("WebSocket connection {} is closed with close status: {}", session.getId(), closeStatus);
         } catch (Exception e) {
             log.error("Failed to handle connection closure: {}", e.getMessage());
