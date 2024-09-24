@@ -3,9 +3,6 @@ package org.example.service.websocket;
 import lombok.extern.slf4j.Slf4j;
 import org.example.boundaries.websocket.messages.WebSocketMessageBoundary;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.redis.connection.RedisConnectionFactory;
-import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.WebSocketSession;
@@ -18,18 +15,11 @@ import static org.example.utils.Constants.MAX_RETRIES;
 @Component
 public class WebSocketSessionManager {
 
-    private RedisTemplate<String, WebSocketSession> redisTemplate;
+    private final RedisTemplate<String, WebSocketSession> redisTemplate;
 
     @Autowired
-    public void setRedisTemplate(@Value("${spring.redis.host}") String host,
-                                 @Value("${spring.redis.port}") int port) {
-        // Create a RedisConnectionFactory using the injected properties
-        RedisConnectionFactory redisConnectionFactory = new LettuceConnectionFactory(host, port);
-
-        // Create RedisTemplate using the RedisConnectionFactory
-        redisTemplate = new RedisTemplate<>();
-        redisTemplate.setConnectionFactory(redisConnectionFactory);
-        redisTemplate.afterPropertiesSet(); // Make sure the template is fully initialized
+    public WebSocketSessionManager(RedisTemplate<String, WebSocketSession> redisTemplate) {
+        this.redisTemplate = redisTemplate;
     }
 
     // Add and open a session to the appropriate Redis map based on clientType
@@ -59,16 +49,15 @@ public class WebSocketSessionManager {
 
     // Send a message to a specific session by session ID with retry logic
     public void sendMessage(String sessionId, WebSocketMessageBoundary messageBoundary) {
-
         WebSocketSession session = redisTemplate.opsForValue().get(sessionId);
         if (session != null && session.isOpen()) {
             boolean success = sendMessageWithRetry(session, messageBoundary);
             if (!success) {
                 log.error("Failed to send message to session {} after {} attempts", sessionId, MAX_RETRIES);
                 closeAndRemoveSession(session); // Assuming OrderBus client type here, adjust as necessary
-            } else {
-                log.warn("Session {} is not open or does not exist", sessionId);
             }
+        } else {
+            log.warn("Session {} is not open or does not exist", sessionId);
         }
     }
 
