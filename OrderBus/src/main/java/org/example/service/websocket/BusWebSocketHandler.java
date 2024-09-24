@@ -30,7 +30,8 @@ public class BusWebSocketHandler implements WebSocketHandler {
     public void afterConnectionEstablished(WebSocketSession session) {
         try {
             sessionManager.connectAndAddSession(session);
-            log.info("WebSocket connection {} established", session.getId());
+            String clientType = getClientTypeFromSession(session);  // Extract client type
+            log.info("WebSocket connection {} established from client type {}", session.getId(),clientType);
         } catch (Exception e) {
             log.error("Failed to establish WebSocket connection: {}", e.getMessage());
         }
@@ -40,6 +41,7 @@ public class BusWebSocketHandler implements WebSocketHandler {
     public void handleMessage(WebSocketSession session, WebSocketMessage<?> message) {
         try {
             WebSocketMessageBoundary messageBoundary = objectMapper.readValue(message.getPayload().toString(), WebSocketMessageBoundary.class);
+            log.info("Received message from client: {}", messageBoundary);
 
             // Add handling logic based on messageBoundary
             switch (messageBoundary.getOption()) {
@@ -80,13 +82,13 @@ public class BusWebSocketHandler implements WebSocketHandler {
 
     private String getClientTypeFromSession(WebSocketSession session) {
         Map<String, String> queryParams = getQueryParams(session);
-        return queryParams.get("clientType");
+        return queryParams.get("clientType");  // Extract the clientType from query params
     }
 
     private Map<String, String> getQueryParams(WebSocketSession session) {
-        String query = Objects.requireNonNull(session.getUri()).getQuery();
+        String query = Objects.requireNonNull(session.getUri()).getQuery();  // Get the query string
         return org.springframework.web.util.UriComponentsBuilder.fromUriString("?" + query)
-                .build().getQueryParams().toSingleValueMap();
+                .build().getQueryParams().toSingleValueMap();  // Parse query parameters
     }
 
     private double calculateDistance(double lat1, double lon1, double lat2, double lon2) {

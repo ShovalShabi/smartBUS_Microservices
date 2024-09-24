@@ -19,7 +19,7 @@ public class BusNotificationWebSocketConfig implements WebSocketConfigurer {
 
     @Override
     public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
-        registry.addHandler(busWebSocketHandler, "/ws/orderbus?clientType={clientType}")
-                .setAllowedOrigins("*");
+        registry.addHandler(busWebSocketHandler, "/notification-service")
+                .setAllowedOriginPatterns("*");
     }
 }
