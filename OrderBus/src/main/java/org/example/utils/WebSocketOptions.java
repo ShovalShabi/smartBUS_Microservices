@@ -4,5 +4,6 @@ public enum WebSocketOptions {
     REQUEST_BUS,
     CANCELING_RIDE,
     ACCEPTING_RIDE,
-    BUS_NEARBY
+    BUS_NEARBY,
+    LOCATION_POLLING
 }
