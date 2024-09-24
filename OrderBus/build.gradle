@@ -71,6 +71,10 @@ dependencies {
 
     // Additional dependencies for testing
     testImplementation 'io.projectreactor:reactor-test'
+
+    //Checking server health status
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+
 }
 
 // Configure test task to use JUnit Platform
