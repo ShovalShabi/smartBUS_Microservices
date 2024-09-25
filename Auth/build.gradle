@@ -10,7 +10,7 @@ ext {
 }
 
 // Define project details
-group = 'com.example' // Group ID for the project
+group = 'club.smartbus' // Group ID for the project
 version = '0.0.1-SNAPSHOT' // Version of the project
 
 // Set Java source compatibility

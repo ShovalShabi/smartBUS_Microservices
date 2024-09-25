@@ -1,6 +1,5 @@
 rootProject.name = 'smartBUS'
 include 'Routes'
-include 'Manager'
 include 'Feedback'
 include 'Auth'
 include 'OrderBus'
