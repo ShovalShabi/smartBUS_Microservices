@@ -1,7 +1,0 @@
-# PostgreSQL Configuration
-
-database: OrderBusDB
-user: postgres
-password: Ss123456
-host: orderbus_db
-port: 5432
