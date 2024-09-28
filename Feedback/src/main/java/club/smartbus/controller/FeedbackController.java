@@ -5,6 +5,7 @@ import club.smartbus.service.FeedbackService;
 import club.smartbus.utils.Constants;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Profile;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
@@ -82,5 +83,21 @@ public class FeedbackController {
                 tillDate,
                 size,
                 page);
+    }
+
+
+    /**
+     * Deletes all feedbacks for the specified company.
+     *
+     * <p>This method is only active for development and testing purposes. It allows removing feedback entries associated
+     * with a company, useful for cleaning up test data.
+     *
+     * @param company the name of the company whose feedback entries should be deleted
+     * @return a {@link Mono<Void>} that completes when the deletion process is finished
+     */
+    @Profile({"dev", "test"})
+    @DeleteMapping("/{company}")
+    public Mono<Void> deleteAllFeedbackForCompany(@PathVariable String company) {
+        return feedbackService.deleteAllFeedbackForCompany(company);
     }
 }

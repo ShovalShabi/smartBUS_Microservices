@@ -42,7 +42,7 @@ public class FeedbackServiceImpl implements FeedbackService {
      * errors are found, an error will be returned, otherwise the feedback is saved to the database and returned.
      *
      * @param feedbackDTO the feedback data to be saved
-     * @param company the company to which the feedback belongs
+     * @param company     the company to which the feedback belongs
      * @return a {@link Mono} emitting the saved {@link FeedbackDTO}, or an error if validation fails
      */
     @Override
@@ -75,12 +75,12 @@ public class FeedbackServiceImpl implements FeedbackService {
      * <p>The method checks that the start date is not after the end date, and retrieves feedbacks that match the criteria
      * of minimum rating, date range, company, and pagination settings.
      *
-     * @param company the company to retrieve feedback for
+     * @param company   the company to retrieve feedback for
      * @param minRating the minimum rating for feedback entries to be included
-     * @param fromDate the start of the date range to filter feedback (inclusive); can be null for no lower limit
-     * @param tillDate the end of the date range to filter feedback (inclusive); can be null for no upper limit
-     * @param size the number of feedback entries per page
-     * @param page the page number for pagination
+     * @param fromDate  the start of the date range to filter feedback (inclusive); can be null for no lower limit
+     * @param tillDate  the end of the date range to filter feedback (inclusive); can be null for no upper limit
+     * @param size      the number of feedback entries per page
+     * @param page      the page number for pagination
      * @return a {@link Flux} emitting matching {@link FeedbackDTO} entries or an error if date validation fails
      */
     @Override
@@ -94,7 +94,27 @@ public class FeedbackServiceImpl implements FeedbackService {
         // Call the repository method with the provided parameters
         return feedbackRepository.fetchFeedbacksByCompanyAndRatingAndDateRange(company, minRating, fromDate, tillDate, size, page)
                 .map(FeedbackEntity::toDTO)  // Convert each FeedbackEntity to FeedbackDTO
+                .switchIfEmpty(Flux.empty()) // Return empty Flux if no results
                 .doOnNext(feedback -> log.info("Retrieved feedback: {}", feedback))
                 .doOnError(error -> log.error("Error retrieving feedbacks", error));
+    }
+
+    /**
+     * Deletes all feedback entries associated with a specific company.
+     *
+     * <p>This method deletes all feedback records from the database that are associated with the provided company name.
+     * It is typically used in development and testing environments to remove test data or reset feedback records for a company.
+     *
+     * <p>The method interacts with the {@link FeedbackRepository} to perform the deletion, logging the operation upon success.
+     * After the deletion is complete, a {@code Mono<Void>} is returned, which completes successfully once the operation is done.
+     *
+     * @param company the name of the company whose feedback records should be deleted
+     * @return a {@link Mono<Void>} that completes once the deletion operation is finished
+     */
+    @Override
+    public Mono<Void> deleteAllFeedbackForCompany(String company) {
+        return feedbackRepository.deleteByCompany(company)
+                .doOnSuccess(unused -> log.info("Deleted all feedbacks for company: {}", company))
+                .then();
     }
 }

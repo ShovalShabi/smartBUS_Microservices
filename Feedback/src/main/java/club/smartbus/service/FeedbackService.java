@@ -44,4 +44,19 @@ public interface FeedbackService {
      * @return a {@link Flux} emitting the matching {@link FeedbackDTO} entries, or an empty {@link Flux} if no entries match
      */
     Flux<FeedbackDTO> getCompanyFeedbacksFromRatingOnwardsByDates(String company, Double minRating, LocalDateTime fromDate, LocalDateTime tillDate, int size, int page);
+
+    /**
+     * Deletes all feedback entries associated with a specific company.
+     *
+     * <p>This method is intended for use in development and testing environments. It allows for the complete removal
+     * of all feedback data related to the specified company. This is useful for cleaning up test data or resetting
+     * the feedback state during testing.
+     *
+     * <p>The method returns a {@link Mono} that completes when the deletion process is finished.
+     * If there are no feedback entries for the company, the method will still complete successfully.
+     *
+     * @param company the name of the company whose feedback entries should be deleted
+     * @return a {@link Mono<Void>} that completes when the deletion operation is finished, emitting {@code void} upon completion
+     */
+    Mono<Void> deleteAllFeedbackForCompany(String company);
 }

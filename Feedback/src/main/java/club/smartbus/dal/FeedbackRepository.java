@@ -5,6 +5,7 @@ import org.springframework.data.r2dbc.repository.Query;
 import org.springframework.data.r2dbc.repository.R2dbcRepository;
 import org.springframework.stereotype.Repository;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -39,4 +40,19 @@ public interface FeedbackRepository extends R2dbcRepository<FeedbackEntity, UUID
             "AND (:tillDate IS NULL OR creation_timestamp <= :tillDate) " +
             "LIMIT :size OFFSET :page")
     Flux<FeedbackEntity> fetchFeedbacksByCompanyAndRatingAndDateRange(String company, Double minRating, LocalDateTime fromDate, LocalDateTime tillDate, int size, int page);
+
+    /**
+     * Deletes all feedback records associated with a specific company from the database.
+     *
+     * <p>This method executes a delete query to remove all feedback records that are associated with the given company name.
+     * It is commonly used for cleanup purposes during testing and development.
+     *
+     * <p>The method returns a {@link Mono} that emits a result once the operation is complete. If no records are found for the company,
+     * the deletion still completes successfully.
+     *
+     * @param company the name of the company whose feedback records are to be deleted
+     * @return a {@link Mono<Object>} that completes after the deletion operation is done
+     */
+    @Query("DELETE FROM feedback WHERE agency = :company")
+    Mono<Object> deleteByCompany(String company);
 }
