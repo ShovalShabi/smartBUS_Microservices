@@ -1,0 +1,191 @@
+package club.smartbus.service;
+
+import club.smartbus.dal.FeedbackRepository;
+import club.smartbus.data.FeedbackEntity;
+import club.smartbus.dto.FeedbackDTO;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+import org.springframework.validation.BeanPropertyBindingResult;
+import org.springframework.validation.Validator;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+import reactor.test.StepVerifier;
+
+import java.time.LocalDateTime;
+import java.util.UUID;
+
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.*;
+
+class FeedbackServiceImplTest {
+
+    @Mock
+    private FeedbackRepository feedbackRepository;
+
+    @Mock
+    private Validator validator;
+
+    @InjectMocks
+    private FeedbackServiceImpl feedbackService;
+
+    private AutoCloseable closeable;
+
+    @BeforeEach
+    void setUp() {
+        closeable = MockitoAnnotations.openMocks(this);
+    }
+
+    @AfterEach
+    void tearDown() throws Exception {
+        closeable.close();
+    }
+
+    @Test
+    void testCreateFeedbackToCompany_Success() {
+        // Arrange
+        FeedbackDTO feedbackDTO = new FeedbackDTO(5.0, "Egged", "123", "user@domain.com", "Great service", LocalDateTime.now());
+        FeedbackEntity feedbackEntity = new FeedbackEntity(feedbackDTO);
+        feedbackEntity.setId(UUID.randomUUID());
+
+        doNothing().when(validator).validate(eq(feedbackDTO), any(BeanPropertyBindingResult.class));
+        when(feedbackRepository.save(any(FeedbackEntity.class))).thenReturn(Mono.just(feedbackEntity));
+
+        // Act
+        Mono<FeedbackDTO> result = feedbackService.createFeedbackToCompany(feedbackDTO, "Egged");
+
+        // Assert
+        StepVerifier.create(result)
+                .expectNext(feedbackDTO)
+                .verifyComplete();
+
+        verify(validator).validate(eq(feedbackDTO), any(BeanPropertyBindingResult.class));
+        verify(feedbackRepository).save(any(FeedbackEntity.class));
+    }
+
+    @Test
+    void testCreateFeedbackToCompany_ValidationFailure() {
+        // Arrange
+        FeedbackDTO feedbackDTO = new FeedbackDTO(null, "Egged", "123", "invalid-email", "", LocalDateTime.now());
+
+        // Mock the validation process to simulate validation failure
+        doAnswer(invocation -> {
+            BeanPropertyBindingResult bindingResult = invocation.getArgument(1);
+            bindingResult.reject("validation failed");
+            return null;
+        }).when(validator).validate(eq(feedbackDTO), any(BeanPropertyBindingResult.class));
+
+        // Act
+        Mono<FeedbackDTO> result = feedbackService.createFeedbackToCompany(feedbackDTO, "Egged");
+
+        // Assert
+        StepVerifier.create(result)
+                .expectError(RuntimeException.class)
+                .verify();
+
+        verify(validator).validate(eq(feedbackDTO), any(BeanPropertyBindingResult.class));
+        verify(feedbackRepository, never()).save(any(FeedbackEntity.class));
+    }
+
+
+    @Test
+    void testGetCompanyFeedbacks_Success() {
+        // Arrange
+        FeedbackEntity feedbackEntity = new FeedbackEntity(UUID.randomUUID(), 4.0, "Egged", "123", "user@domain.com", "Good", LocalDateTime.now());
+        when(feedbackRepository.fetchFeedbacksByCompanyAndRatingAndDateRange(
+                eq("Egged"),
+                eq(4.0),
+                isNull(),
+                isNull(),
+                eq(30),
+                eq(0))
+        ).thenReturn(Flux.just(feedbackEntity)); // Return a non-null Flux
+
+        // Act
+        Flux<FeedbackDTO> result = feedbackService.getCompanyFeedbacksFromRatingOnwardsByDates("Egged", 4.0, null, null, 30, 0);
+
+        // Assert
+        StepVerifier.create(result)
+                .expectNextMatches(dto -> dto.getAgency().equals("Egged"))
+                .verifyComplete();
+
+        verify(feedbackRepository).fetchFeedbacksByCompanyAndRatingAndDateRange(
+                eq("Egged"),
+                eq(4.0),
+                isNull(),
+                isNull(),
+                eq(30),
+                eq(0)
+        );
+    }
+
+
+    @Test
+    void testGetCompanyFeedbacks_EmptyResult() {
+        // Arrange: Ensure that the repository returns an empty Flux when no feedback is found
+        when(feedbackRepository.fetchFeedbacksByCompanyAndRatingAndDateRange(
+                eq("Egged"),
+                eq(4.0),
+                isNull(),
+                isNull(),
+                eq(30),
+                eq(0))
+        ).thenReturn(Flux.empty());
+
+        // Act: Call the service method
+        Flux<FeedbackDTO> result = feedbackService.getCompanyFeedbacksFromRatingOnwardsByDates("Egged", 4.0, null, null, 30, 0);
+
+        // Assert: Verify that the Flux is empty
+        StepVerifier.create(result)
+                .expectNextCount(0)
+                .verifyComplete();
+
+        // Verify the repository interaction
+        verify(feedbackRepository).fetchFeedbacksByCompanyAndRatingAndDateRange(
+                eq("Egged"),
+                eq(4.0),
+                isNull(),
+                isNull(),
+                eq(30),
+                eq(0)
+        );
+    }
+
+
+
+    @Test
+    void testGetCompanyFeedbacks_InvalidDateRange() {
+        // Arrange
+        LocalDateTime fromDate = LocalDateTime.now();
+        LocalDateTime tillDate = fromDate.minusDays(1);
+
+        // Act
+        Flux<FeedbackDTO> result = feedbackService.getCompanyFeedbacksFromRatingOnwardsByDates("Egged", 4.0, fromDate, tillDate, 30, 0);
+
+        // Assert
+        StepVerifier.create(result)
+                .expectError(IllegalArgumentException.class)
+                .verify();
+
+        verify(feedbackRepository, never()).fetchFeedbacksByCompanyAndRatingAndDateRange(anyString(), anyDouble(), any(LocalDateTime.class), any(LocalDateTime.class), anyInt(), anyInt());
+    }
+
+    @Test
+    void testDeleteAllFeedbackForCompany_Success() {
+        // Arrange
+        when(feedbackRepository.deleteByCompany(anyString())).thenReturn(Mono.empty());
+
+        // Act
+        Mono<Void> result = feedbackService.deleteAllFeedbackForCompany("Egged");
+
+        // Assert
+        StepVerifier.create(result)
+                .verifyComplete();
+
+        verify(feedbackRepository).deleteByCompany(anyString());
+    }
+}
