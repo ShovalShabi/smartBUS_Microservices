@@ -88,8 +88,10 @@ dependencies {
     // Add Springdoc OpenAPI and Swagger UI for WebFlux
     implementation 'org.springdoc:springdoc-openapi-starter-webflux-ui:2.1.0'
 
+    // Jakarta Expression Language (EL) implementation, used for evaluating expressions
     implementation 'org.glassfish:jakarta.el:4.0.2'
 
+    // Flyway Core for database migrations
     implementation 'org.flywaydb:flyway-core'
 
 }
@@ -97,4 +99,5 @@ dependencies {
 // Configure test task to use JUnit Platform
 tasks.named('test') {
     useJUnitPlatform()
+    jvmArgs += ['-Xshare:off'] // Disable class data sharing to suppress warning
 }
