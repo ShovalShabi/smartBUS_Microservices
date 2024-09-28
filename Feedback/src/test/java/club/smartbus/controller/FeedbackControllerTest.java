@@ -25,6 +25,10 @@ import static org.mockito.Mockito.*;
 import org.springframework.data.r2dbc.core.R2dbcEntityTemplate;
 import reactor.test.StepVerifier;
 
+/**
+ * Unit test class for the FeedbackController.
+ * Tests the behavior of feedback-related APIs using WebFlux.
+ */
 @WebFluxTest(controllers = FeedbackController.class)
 @Import(TestSecurityConfig.class)
 public class FeedbackControllerTest {
@@ -41,11 +45,17 @@ public class FeedbackControllerTest {
     @Autowired
     private WebTestClient webTestClient;
 
+    /**
+     * Sets up the test environment by initializing Mockito annotations.
+     */
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
     }
 
+    /**
+     * Cleans up test resources after each test method execution by deleting feedback data for the "Egged" company.
+     */
     @AfterEach
     void cleanUp() {
         webTestClient.delete()
@@ -54,43 +64,54 @@ public class FeedbackControllerTest {
                 .expectStatus().isOk();
     }
 
+    /**
+     * Tests the creation of feedback for a company by making a POST request to the "/Egged" endpoint.
+     * Verifies that the feedback creation logic is working and asserts that the returned feedback data matches the expectations.
+     */
     @Test
     void testCreateFeedback() {
         FeedbackDTO feedbackDTO = new FeedbackDTO(5.0, "Egged", "123", "user@domain.com", "Great service", LocalDateTime.now());
+
+        // Mock the feedback service to return the created feedback
         when(feedbackService.createFeedbackToCompany(any(FeedbackDTO.class), anyString())).thenReturn(Mono.just(feedbackDTO));
 
+        // Make a POST request to create feedback and verify the response
         webTestClient.post()
                 .uri("/Egged")
                 .bodyValue(feedbackDTO)
                 .exchange()
                 .expectStatus().isOk()
-                .expectHeader().contentTypeCompatibleWith(MediaType.TEXT_EVENT_STREAM)  // Allow charset in the response
+                .expectHeader().contentTypeCompatibleWith(MediaType.TEXT_EVENT_STREAM)
                 .returnResult(FeedbackDTO.class)
                 .getResponseBody()
                 .as(StepVerifier::create)
-                .expectNext(feedbackDTO)  // Expect one feedback DTO from the event stream
-                .verifyComplete();  // Complete the verification
+                .expectNext(feedbackDTO)
+                .verifyComplete();
 
+        // Verify that the service method was called with the correct parameters
         verify(feedbackService).createFeedbackToCompany(any(FeedbackDTO.class), anyString());
     }
 
-
+    /**
+     * Tests retrieving feedback for a company with a minimum rating by making a GET request to the "/Egged" endpoint.
+     * Verifies the response stream contains the expected feedback.
+     */
     @Test
     void testGetCompanyFeedbacks() {
         FeedbackDTO feedbackDTO = new FeedbackDTO(4.0, "Egged", "123", "user@domain.com", "Good", LocalDateTime.now());
 
-        // Mock the service to return a Flux with feedbackDTO
+        // Mock the feedback service to return a Flux containing feedbackDTO
         when(feedbackService.getCompanyFeedbacksFromRatingOnwardsByDates(
                 anyString(), anyDouble(), any(LocalDateTime.class), any(LocalDateTime.class), anyInt(), anyInt()))
                 .thenReturn(Flux.just(feedbackDTO));
 
-        // Directly verify the mock output with StepVerifier before calling the webTestClient
+        // Verify the mock service output using StepVerifier
         StepVerifier.create(feedbackService.getCompanyFeedbacksFromRatingOnwardsByDates(
                         "Egged", 4.0, LocalDateTime.now().minusDays(1), LocalDateTime.now(), 0, 30))
                 .expectNext(feedbackDTO)
                 .verifyComplete();
 
-        // Use the webTestClient to send a GET request
+        // Make a GET request to retrieve feedback and verify the response
         webTestClient.get()
                 .uri("/Egged?minRating=4.0&size=30&page=0")
                 .exchange()
@@ -109,21 +130,27 @@ public class FeedbackControllerTest {
                 })
                 .expectComplete();
 
-        // Verify that the mocked service method was called with the expected arguments
+        // Verify that the service method was called with the correct parameters
         verify(feedbackService).getCompanyFeedbacksFromRatingOnwardsByDates(
                 anyString(), anyDouble(), any(LocalDateTime.class), any(LocalDateTime.class), anyInt(), anyInt());
     }
 
-
+    /**
+     * Tests the deletion of all feedback for a company by making a DELETE request to the "/Egged" endpoint.
+     * Verifies that the deletion logic works as expected.
+     */
     @Test
     void testDeleteFeedbackForCompany() {
+        // Mock the feedback service to return an empty Mono on deletion
         when(feedbackService.deleteAllFeedbackForCompany(anyString())).thenReturn(Mono.empty());
 
+        // Make a DELETE request and verify the response
         webTestClient.delete()
                 .uri("/Egged")
                 .exchange()
                 .expectStatus().isOk();
 
+        // Verify that the service method was called with the correct parameters
         verify(feedbackService).deleteAllFeedbackForCompany(anyString());
     }
 }

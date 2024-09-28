@@ -22,6 +22,10 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
+/**
+ * Unit test class for {@link FeedbackServiceImpl}.
+ * This class tests various feedback-related functionalities like creating, retrieving, and deleting feedback.
+ */
 class FeedbackServiceImplTest {
 
     @Mock
@@ -35,16 +39,28 @@ class FeedbackServiceImplTest {
 
     private AutoCloseable closeable;
 
+    /**
+     * Initializes the mocks before each test method execution.
+     */
     @BeforeEach
     void setUp() {
         closeable = MockitoAnnotations.openMocks(this);
     }
 
+    /**
+     * Closes the resources after each test method execution.
+     *
+     * @throws Exception if an exception occurs while closing resources.
+     */
     @AfterEach
     void tearDown() throws Exception {
         closeable.close();
     }
 
+    /**
+     * Tests the successful creation of feedback for a company.
+     * Verifies the feedback creation process, ensuring that the service saves the feedback correctly.
+     */
     @Test
     void testCreateFeedbackToCompany_Success() {
         // Arrange
@@ -67,6 +83,10 @@ class FeedbackServiceImplTest {
         verify(feedbackRepository).save(any(FeedbackEntity.class));
     }
 
+    /**
+     * Tests the failure of feedback creation due to validation errors.
+     * Simulates a validation failure and verifies that the feedback is not saved.
+     */
     @Test
     void testCreateFeedbackToCompany_ValidationFailure() {
         // Arrange
@@ -91,7 +111,10 @@ class FeedbackServiceImplTest {
         verify(feedbackRepository, never()).save(any(FeedbackEntity.class));
     }
 
-
+    /**
+     * Tests the successful retrieval of feedback for a company with a given rating.
+     * Verifies that feedback is retrieved correctly from the repository.
+     */
     @Test
     void testGetCompanyFeedbacks_Success() {
         // Arrange
@@ -123,7 +146,10 @@ class FeedbackServiceImplTest {
         );
     }
 
-
+    /**
+     * Tests the scenario where no feedback is found for the company.
+     * Ensures that an empty result is returned when no feedback is found.
+     */
     @Test
     void testGetCompanyFeedbacks_EmptyResult() {
         // Arrange: Ensure that the repository returns an empty Flux when no feedback is found
@@ -155,8 +181,10 @@ class FeedbackServiceImplTest {
         );
     }
 
-
-
+    /**
+     * Tests the scenario where an invalid date range is provided for retrieving feedback.
+     * Ensures that an error is thrown when the date range is invalid.
+     */
     @Test
     void testGetCompanyFeedbacks_InvalidDateRange() {
         // Arrange
@@ -174,6 +202,10 @@ class FeedbackServiceImplTest {
         verify(feedbackRepository, never()).fetchFeedbacksByCompanyAndRatingAndDateRange(anyString(), anyDouble(), any(LocalDateTime.class), any(LocalDateTime.class), anyInt(), anyInt());
     }
 
+    /**
+     * Tests the successful deletion of all feedback for a company.
+     * Verifies that the feedback repository successfully deletes the feedback.
+     */
     @Test
     void testDeleteAllFeedbackForCompany_Success() {
         // Arrange
