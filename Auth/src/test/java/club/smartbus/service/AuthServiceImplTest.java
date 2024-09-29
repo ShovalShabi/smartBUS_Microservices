@@ -19,6 +19,10 @@ import static org.mockito.Mockito.*;
 
 /**
  * Unit test class for {@link AuthServiceImpl}.
+ * <p>
+ * This class contains unit tests for the {@link AuthServiceImpl} service methods, focusing on testing
+ * the registration, login, and user deletion functionalities. The tests use mock objects for dependencies
+ * such as {@link UserRepository}, {@link PasswordEncoder}, and {@link JWTUtil}.
  */
 class AuthServiceImplTest {
 
@@ -36,16 +40,31 @@ class AuthServiceImplTest {
 
     private AutoCloseable closeable;
 
+    /**
+     * Initializes the mocks before each test method execution.
+     * This ensures that Mockito is set up properly for each test case.
+     */
     @BeforeEach
     void setUp() {
         closeable = MockitoAnnotations.openMocks(this);
     }
 
+    /**
+     * Closes the resources after each test method execution.
+     *
+     * @throws Exception if an exception occurs while closing resources.
+     */
     @AfterEach
     void tearDown() throws Exception {
         closeable.close();
     }
 
+    /**
+     * Test case for successfully registering a new user.
+     * <p>
+     * It checks that the user is correctly registered when no existing user is found,
+     * the password is encoded, and the user entity is inserted into the database.
+     */
     @Test
     void testRegisterUser_Success() {
         // Arrange
@@ -69,6 +88,11 @@ class AuthServiceImplTest {
         verify(userRepository).insertUser(any(UserEntity.class));
     }
 
+    /**
+     * Test case for handling the scenario when the user already exists.
+     * <p>
+     * It verifies that the existing user is returned without attempting to insert a new one.
+     */
     @Test
     void testRegisterUser_UserAlreadyExists() {
         // Arrange
@@ -89,6 +113,11 @@ class AuthServiceImplTest {
         verify(userRepository, never()).insertUser(any(UserEntity.class));
     }
 
+    /**
+     * Test case for successfully logging in a user with a new JWT token.
+     * <p>
+     * It checks that the password is correctly validated, and if no token exists, a new token is generated.
+     */
     @Test
     void testUserLogin_SuccessWithNewToken() {
         // Arrange
@@ -111,6 +140,11 @@ class AuthServiceImplTest {
         verify(jwtUtil).generateToken(anyString());
     }
 
+    /**
+     * Test case for handling failed login due to invalid credentials.
+     * <p>
+     * It verifies that when the password does not match, an error is returned indicating invalid credentials.
+     */
     @Test
     void testUserLogin_Failure_InvalidCredentials() {
         // Arrange
@@ -132,6 +166,11 @@ class AuthServiceImplTest {
         verify(passwordEncoder).matches(anyString(), anyString());
     }
 
+    /**
+     * Test case for successfully deleting all users.
+     * <p>
+     * It verifies that the service correctly deletes all users from the database.
+     */
     @Test
     void testDeleteAllUsers_Success() {
         // Arrange
