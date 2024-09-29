@@ -133,4 +133,19 @@ public class AuthServiceImpl implements AuthService {
                     return Mono.error(new RuntimeException("User not found"));
                 }));
     }
+
+
+    /**
+     * Deletes all users in the database for testing purposes.
+     * <p>
+     * This method should only be used in development or testing profiles.
+     * </p>
+     *
+     * @return A {@link Mono} signaling the completion of the operation.
+     */
+    @Override
+    public Mono<Void> deleteAllUsers() {
+        log.info("Deleting all users for testing purposes.");
+        return userRepository.deleteAll();
+    }
 }

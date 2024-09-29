@@ -5,6 +5,7 @@ import club.smartbus.service.AuthService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Profile;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
@@ -54,6 +55,22 @@ public class AuthController {
                                    @RequestParam String password) {
         log.info("Login attempt for user: {}, for company: {}", email, company);
         return authService.userLogin(company, email, password);
+    }
+
+    /**
+     * Deletes all users in the database for testing purposes.
+     * <p>
+     * This method is limited to development and testing profiles.
+     * </p>
+     *
+     * @return A {@link Mono} signaling when the operation has completed.
+     */
+    @DeleteMapping(path = "/users", produces = MediaType.TEXT_PLAIN_VALUE)
+    @Profile({"dev", "test"})
+    public Mono<String> deleteAllUsers() {
+        log.info("Deleting all users in the system.");
+        return authService.deleteAllUsers()
+                .then(Mono.just("All users deleted successfully"));
     }
 
 }

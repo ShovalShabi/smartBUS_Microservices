@@ -40,4 +40,11 @@ public interface AuthService {
      * @return a {@link Mono} emitting the user details along with a JWT token as a {@link UserDTO} or an error if login fails.
      */
     Mono<UserDTO> userLogin(String company, String email, String password);
+
+    /**
+     * Deletes all users in the database for testing purposes.
+     *
+     * @return A {@link Mono} signaling the completion of the operation.
+     */
+    Mono<Void> deleteAllUsers();
 }
