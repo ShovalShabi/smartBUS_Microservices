@@ -42,7 +42,7 @@ public class FeedbackController {
      * @param feedbackDTO the feedback data transfer object containing the feedback details
      * @return a {@code Mono<FeedbackDTO>} containing the feedback data that was created
      */
-    @PostMapping(path = "/{company}", produces = {MediaType.TEXT_EVENT_STREAM_VALUE})
+    @PostMapping(path = "/{company}", produces = {MediaType.APPLICATION_JSON_VALUE})
     public Mono<FeedbackDTO> createFeedback(
             @PathVariable String company,
             @RequestBody FeedbackDTO feedbackDTO) {
@@ -66,7 +66,7 @@ public class FeedbackController {
      */
     @GetMapping(
             path = {"/{company}"},
-            produces = {MediaType.TEXT_EVENT_STREAM_VALUE})
+            produces = {MediaType.APPLICATION_JSON_VALUE})
     public Flux<FeedbackDTO> getCompanyFeedbacks(
             @PathVariable String company,
             @RequestParam(name = "size", required = false, defaultValue = Constants.DEFAULT_PAGE_SIZE) int size,
