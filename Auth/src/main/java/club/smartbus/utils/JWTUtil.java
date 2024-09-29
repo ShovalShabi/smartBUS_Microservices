@@ -11,9 +11,17 @@ import java.util.Date;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+/**
+ * Utility class for handling JWT (JSON Web Token) operations such as token generation, validation, and renewal.
+ * <p>
+ * The class uses HMAC-SHA256 to sign the tokens and stores tokens in memory using a {@link ConcurrentHashMap}.
+ * In a production environment, this token store should be replaced with a more durable storage such as a database
+ * or Redis.
+ * </p>
+ */
 @Component
 @Slf4j
-public class JwtUtil {
+public class JWTUtil {
 
     // Store a strong, secure key (use a more complex key in production)
     private final SecretKey SECRET_KEY = Keys.secretKeyFor(SignatureAlgorithm.HS256);
@@ -23,8 +31,11 @@ public class JwtUtil {
 
     /**
      * Generates a JWT token for a given email.
+     * <p>
+     * The token is valid for 10 hours and is stored in an in-memory token store.
+     * </p>
      *
-     * @param email The subject for which the token is generated.
+     * @param email The subject (email) for which the token is generated.
      * @return A JWT token.
      */
     public String generateToken(String email) {
@@ -54,7 +65,7 @@ public class JwtUtil {
     /**
      * Validates the existing token.
      *
-     * @param token The JWT token.
+     * @param token The JWT token to be validated.
      * @return True if the token is valid, false otherwise.
      */
     public boolean validateToken(String token) {
@@ -69,6 +80,9 @@ public class JwtUtil {
 
     /**
      * Renews an existing valid JWT token by issuing a new one with the same subject.
+     * <p>
+     * The new token is valid for 14 days.
+     * </p>
      *
      * @param existingToken The current JWT token.
      * @return A renewed JWT token.
@@ -105,7 +119,7 @@ public class JwtUtil {
      *
      * @param token The JWT token.
      * @param email The email to validate.
-     * @return True if the token is valid, false otherwise.
+     * @return True if the token is valid for the given email, false otherwise.
      */
     public boolean validateToken(String token, String email) {
         final String extractedEmail = extractEmail(token);

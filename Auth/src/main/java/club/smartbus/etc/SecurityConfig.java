@@ -12,16 +12,39 @@ import org.springframework.security.config.web.server.ServerHttpSecurity;
 
 import static org.springframework.security.config.Customizer.withDefaults;
 
+/**
+ * Security configuration class that manages user authentication, authorization, and HTTP security rules.
+ * <p>
+ * This class sets up in-memory user authentication and configures security filters for the application.
+ * It also disables CSRF protection for development purposes and sets up basic and form-based authentication.
+ * </p>
+ */
 @Slf4j
 @Configuration
 public class SecurityConfig {
 
     private final StartupConfig startupConfig;
 
+    /**
+     * Constructor for SecurityConfig that injects {@link StartupConfig}.
+     *
+     * @param startupConfig The startup configuration that provides the admin user's encoded password.
+     */
     public SecurityConfig(StartupConfig startupConfig) {
         this.startupConfig = startupConfig;
     }
 
+    /**
+     * Configures an in-memory user details service for authentication.
+     * <p>
+     * This method retrieves the encoded admin password from the {@link StartupConfig} and sets up an
+     * in-memory user with the "ADMIN" role. If the password is not initialized, it throws an
+     * {@link IllegalStateException}.
+     * </p>
+     *
+     * @return a {@link InMemoryUserDetailsManager} containing the admin user details.
+     * @throws IllegalStateException if the encoded admin password has not been initialized.
+     */
     @Bean
     public UserDetailsService userDetailsService() {
         String encodedPassword = startupConfig.getEncodedPassword();
@@ -40,6 +63,17 @@ public class SecurityConfig {
         return new InMemoryUserDetailsManager(admin);
     }
 
+    /**
+     * Configures security rules for the application using {@link ServerHttpSecurity}.
+     * <p>
+     * This method disables CSRF protection for development environments and permits access to Swagger
+     * and API documentation paths without authentication. All other requests are authenticated using
+     * either basic authentication or form-based login.
+     * </p>
+     *
+     * @param http The {@link ServerHttpSecurity} object used to configure security settings.
+     * @return a {@link SecurityWebFilterChain} that defines the security configuration for web requests.
+     */
     @Bean
     public SecurityWebFilterChain securityWebFilterChain(ServerHttpSecurity http) {
         return http
