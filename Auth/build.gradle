@@ -32,6 +32,39 @@ repositories {
 
 // Define project dependencies
 dependencies {
+    // Hibernate Validator for Jakarta Bean Validation
+    implementation 'org.hibernate.validator:hibernate-validator:8.0.0.Final'
+
+    // Optional: Jakarta Bean Validation API (if not already provided)
+    implementation 'jakarta.validation:jakarta.validation-api:3.0.2'
+
+    // Spring Boot Starter Web for building web applications and applying netty as web server
+    implementation('org.springframework.boot:spring-boot-starter-web') {
+        exclude group: 'org.springframework.boot', module: 'spring-boot-starter-tomcat'
+    }
+    implementation 'org.springframework.boot:spring-boot-starter-reactor-netty'
+
+    // JJWT Implementation and Signer
+    implementation 'io.jsonwebtoken:jjwt-api:0.11.5'
+    implementation 'io.jsonwebtoken:jjwt-impl:0.11.5'  // Implementation for JWT
+    implementation 'io.jsonwebtoken:jjwt-jackson:0.11.5'  // Jackson for JSON handling
+
+
+    // PostgreSQL JDBC driver for connecting to PostgreSQL database
+    implementation 'org.postgresql:postgresql'
+
+    // Spring Boot Starter Data JPA for using Spring Data JPA with Hibernate
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+
+    // Spring Boot Starter Security for authentication and authorization
+    implementation 'org.springframework.boot:spring-boot-starter-security'
+
+    // H2 Database for testing and development
+    implementation 'com.h2database:h2'
+
+    // Spring Boot Starter for R2DBC support
+    implementation 'org.springframework.boot:spring-boot-starter-data-r2dbc'
+
     // Spring Boot Starter Actuator for production-ready features
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
 
@@ -44,11 +77,29 @@ dependencies {
     // Lombok for reducing boilerplate code
     compileOnly 'org.projectlombok:lombok'
 
+    // Lombok annotation processor for compile time
+    annotationProcessor 'org.projectlombok:lombok'
+
+    // PostgreSQL JDBC driver for runtime
+    runtimeOnly 'org.postgresql:postgresql'
+
+    // R2DBC PostgreSQL driver for runtime
+    runtimeOnly 'org.postgresql:r2dbc-postgresql'
+
     // Spring Boot Starter Test for testing support
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
 
     // Additional dependencies for testing
     testImplementation 'io.projectreactor:reactor-test'
+
+    // Add Springdoc OpenAPI and Swagger UI for WebFlux
+    implementation 'org.springdoc:springdoc-openapi-starter-webflux-ui:2.1.0'
+
+    // Jakarta Expression Language (EL) implementation, used for evaluating expressions
+    implementation 'org.glassfish:jakarta.el:4.0.2'
+
+    // Flyway Core for database migrations
+    implementation 'org.flywaydb:flyway-core'
 }
 
 dependencyManagement {
@@ -60,4 +111,5 @@ dependencyManagement {
 // Configure test task to use JUnit Platform
 tasks.named('test') {
     useJUnitPlatform()
+    jvmArgs += ['-Xshare:off'] // Disable class data sharing to suppress warning
 }
