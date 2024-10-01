@@ -13,7 +13,7 @@ services:
     ports:
       - "5432:5432"
     volumes:
-      - postgres-data:/var/lib/postgresql/data
+      - postgres-data-prod:/var/lib/postgresql/data
       - ./db-init:/docker-entrypoint-initdb.d
 
   # Auth service (prod)
@@ -97,8 +97,8 @@ services:
     ports:
       - "6379:6379" # Redis default port
     volumes:
-      - redis-data:/data
+      - redis-data-prod:/data
 
 volumes:
-  postgres-data:
-  redis-data:
+  postgres-data-prod:
+  redis-data-prod:
