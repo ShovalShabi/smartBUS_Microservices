@@ -1,7 +1,7 @@
-# PostgreSQL Configuration
+# PostgresSQL Configuration
 
-database: gtfs
-user: postgres
-password: 12683579
-host: PostgresContainer
-port: 5432
+database: gtfs # DB name, relatively matched to the configurations of OrderBus service
+user: postgres # Username for registering the Postgres server
+password: 12683579 # Password of the user
+host: PostgresContainer # Relatively matched to the container's name of the Postgres service
+port: 5432 # The regular port of the Postgres DB server
