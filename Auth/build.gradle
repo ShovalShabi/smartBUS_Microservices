@@ -74,6 +74,9 @@ dependencies {
     // Spring Boot Starter Security for securing applications
     implementation 'org.springframework.cloud:spring-cloud-starter-gateway'
 
+    // Development-only dependency for Docker Compose support
+    developmentOnly 'org.springframework.boot:spring-boot-docker-compose'
+
     // Lombok for reducing boilerplate code
     compileOnly 'org.projectlombok:lombok'
 
