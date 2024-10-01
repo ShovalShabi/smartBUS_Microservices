@@ -1,44 +1,147 @@
 version: '3.8'
 
 services:
-  orderbus_db:
-    image: postgres:latest
-    container_name: orderbus_db
+  # PostgreSQL container
+  PostgresContainer:
+    image: postgres:14
     environment:
-      POSTGRES_PASSWORD: Ss123456
       POSTGRES_USER: postgres
-      POSTGRES_DB: OrderBusDB
+      POSTGRES_PASSWORD: 12683579
     ports:
       - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./db-init:/docker-entrypoint-initdb.d
 
-  init_orderbus_db:
-    container_name: init_orderbus_db
+  # Auth service (dev)
+  auth-dev:
     build:
-      context: ./OrderBus/init_db
-      args:
-        GIT_REPO_URL: 'https://github.com/tamir303/GtfsScript.git'
+      context: ./Auth
+      dockerfile: Dockerfile
     environment:
-      POSTGRES_DB: OrderBusDB
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: Ss123456
-      POSTGRES_HOST: db
-      POSTGRES_PORT: 5432
+      - SPRING_PROFILES_ACTIVE=dev
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://PostgresContainer:5432/AuthDBDev
+    ports:
+      - "3804:3804"
     depends_on:
-      - orderbus_db
+      - PostgresContainer
 
-  orderbus_app:
-    container_name: orderbus_app
+  # Auth service (prod)
+  auth-prod:
+    build:
+      context: ./Auth
+      dockerfile: Dockerfile
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://PostgresContainer:5432/AuthDBProd
+    ports:
+      - "10000:10000"
+    depends_on:
+      - PostgresContainer
+
+  # Feedback service (dev)
+  feedback-dev:
+    build:
+      context: ./Feedback
+      dockerfile: Dockerfile
+    environment:
+      - SPRING_PROFILES_ACTIVE=dev
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://PostgresContainer:5432/FeedbackDBDev
+    ports:
+      - "5003:5003"
+    depends_on:
+      - PostgresContainer
+
+  # Feedback service (prod)
+  feedback-prod:
+    build:
+      context: ./Feedback
+      dockerfile: Dockerfile
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://PostgresContainer:5432/FeedbackDBProd
+    ports:
+      - "10050:10050"
+    depends_on:
+      - PostgresContainer
+
+  # GTFS service
+  gtfs:
+    build:
+      context: ./GTFS
+      dockerfile: Dockerfile
+    volumes:
+      - ./GTFS/public:/app/GtfsScript/public # Mounting public folder for GTFS data
+      - ./GTFS/config.yaml:/app/GtfsScript/config/config.yaml # Provide the config.yaml file
+    depends_on:
+      - PostgresContainer
+    environment:
+      - POSTGRES_URL=jdbc:postgresql://PostgresContainer:5432/gtfs
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=12683579
+    ports:
+      - "8000:8000" # Or the port you need to expose for GTFS
+
+  # OrderBus service (dev)
+  orderbus-dev:
     build:
       context: ./OrderBus
-    ports:
-      - "8080:10093"
+      dockerfile: Dockerfile
     environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/OrderBusDB
-      SPRING_DATASOURCE_USERNAME: postgres
-      SPRING_DATASOURCE_PASSWORD: Ss123456
-      SPRING_PROFILES_ACTIVE: default,generate-messages
+      - SPRING_PROFILES_ACTIVE=dev
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://PostgresContainer:5432/gtfs
+    ports:
+      - "6936:6936"
     depends_on:
-      - orderbus_db
-      - init_orderbus_db
-    links:
-      - orderbus_db
+      - PostgresContainer
+      - gtfs
+      - routes-dev
+      - RedisContainer
+
+  # OrderBus service (prod)
+  orderbus-prod:
+    build:
+      context: ./OrderBus
+      dockerfile: Dockerfile
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://PostgresContainer:5432/gtfs
+    ports:
+      - "10093:10093"
+    depends_on:
+      - PostgresContainer
+      - gtfs
+      - routes-prod
+      - RedisContainer
+
+  # Routes service (dev)
+  routes-dev:
+    build:
+      context: ./Routes
+      dockerfile: Dockerfile
+    environment:
+      - SPRING_PROFILES_ACTIVE=dev
+    ports:
+      - "6924:6924"
+
+  # Routes service (prod)
+  routes-prod:
+    build:
+      context: ./Routes
+      dockerfile: Dockerfile
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod
+    ports:
+      - "10094:10094"
+
+  # Redis container
+  RedisContainer:
+    image: redis:7
+    ports:
+      - "6379:6379" # Redis default port
+    volumes:
+      - redis-data:/data
+
+volumes:
+  postgres-data:
+  redis-data:
