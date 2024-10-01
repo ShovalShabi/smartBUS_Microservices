@@ -1,9 +1,9 @@
 version: '3.8'
 
 services:
-  # PostgreSQL container
+  # PostgreSQL container (slimmed down)
   PostgresContainer:
-    image: postgres:14
+    image: postgres:14-alpine
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: 12683579
@@ -134,9 +134,9 @@ services:
     ports:
       - "10094:10094"
 
-  # Redis container
+  # Redis container (slimmed down)
   RedisContainer:
-    image: redis:7
+    image: redis:7-alpine
     ports:
       - "6379:6379" # Redis default port
     volumes:
