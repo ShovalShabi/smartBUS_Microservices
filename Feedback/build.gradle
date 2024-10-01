@@ -61,14 +61,11 @@ dependencies {
     // Spring Boot Starter WebFlux for reactive web applications
     implementation 'org.springframework.boot:spring-boot-starter-webflux'
 
-    // Apache Kafka Streams for Kafka integration
-//    implementation 'org.apache.kafka:kafka-streams'
-
     // Lombok for reducing boilerplate code
     compileOnly 'org.projectlombok:lombok'
 
     // Development-only dependency for Docker Compose support
-//    developmentOnly 'org.springframework.boot:spring-boot-docker-compose'
+    developmentOnly 'org.springframework.boot:spring-boot-docker-compose'
 
     // PostgreSQL JDBC driver for runtime
     runtimeOnly 'org.postgresql:postgresql'
