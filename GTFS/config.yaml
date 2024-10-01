@@ -1,0 +1,7 @@
+# PostgreSQL Configuration
+
+database: gtfs
+user: postgres
+password: 12683579
+host: PostgresContainer
+port: 5432
