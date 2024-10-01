@@ -43,4 +43,5 @@ bin/
 .DS_Store
 
 ### Ignoring the auto-generated file of the GTFS script ###
-/GTFS/public/
+/GTFS/dev/public/
+/GTFS/prod/public/

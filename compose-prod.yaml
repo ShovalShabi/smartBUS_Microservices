@@ -3,8 +3,9 @@
 version: '3.8'
 
 services:
-  # PostgresSQL container (slimmed down)
+  # PostgreSQL container (slimmed down)
   PostgresContainer:
+    container_name: smartbus-prod-PostgresContainer
     image: postgres:14-alpine
     environment:
       POSTGRES_USER: postgres
@@ -15,21 +16,9 @@ services:
       - postgres-data:/var/lib/postgresql/data
       - ./db-init:/docker-entrypoint-initdb.d
 
-  # Auth service (dev)
-  auth-dev:
-    build:
-      context: ./Auth
-      dockerfile: Dockerfile
-    environment:
-      - SPRING_PROFILES_ACTIVE=dev
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://PostgresContainer:5432/AuthDBDev
-    ports:
-      - "3804:3804"
-    depends_on:
-      - PostgresContainer
-
   # Auth service (prod)
   auth-prod:
+    container_name: smartbus-prod-Auth
     build:
       context: ./Auth
       dockerfile: Dockerfile
@@ -41,21 +30,9 @@ services:
     depends_on:
       - PostgresContainer
 
-  # Feedback service (dev)
-  feedback-dev:
-    build:
-      context: ./Feedback
-      dockerfile: Dockerfile
-    environment:
-      - SPRING_PROFILES_ACTIVE=dev
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://PostgresContainer:5432/FeedbackDBDev
-    ports:
-      - "5003:5003"
-    depends_on:
-      - PostgresContainer
-
   # Feedback service (prod)
   feedback-prod:
+    container_name: smartbus-prod-Feedback
     build:
       context: ./Feedback
       dockerfile: Dockerfile
@@ -69,39 +46,25 @@ services:
 
   # GTFS service
   gtfs:
+    container_name: smartbus-prod-GTFS
     build:
       context: ./GTFS
       dockerfile: Dockerfile
     volumes:
-      - ./GTFS/public:/app/GtfsScript/public # Mounting public folder for GTFS data
-      - ./GTFS/config.yaml:/app/GtfsScript/config/config.yaml # Provide the config.yaml file
+      - ./GTFS/prod/public:/app/GtfsScript/public # Mounting public folder for GTFS data
+      - ./GTFS/prod/config.yaml:/app/GtfsScript/config/config.yaml # Provide the config.yaml file
     depends_on:
       - PostgresContainer
     environment:
-      - POSTGRES_URL=jdbc:postgresql://PostgresContainer:5432/gtfs
+      - POSTGRES_URL=jdbc:postgresql://PostgresContainer:5432/GTFSProd
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=12683579
     ports:
-      - "8000:8000" # Or the port you need to expose for GTFS
-
-  # OrderBus service (dev)
-  orderbus-dev:
-    build:
-      context: ./OrderBus
-      dockerfile: Dockerfile
-    environment:
-      - SPRING_PROFILES_ACTIVE=dev
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://PostgresContainer:5432/gtfs
-    ports:
-      - "6936:6936"
-    depends_on:
-      - PostgresContainer
-      - gtfs
-      - routes-dev
-      - RedisContainer
+      - "9000:9000" # Or the port you need to expose for GTFS
 
   # OrderBus service (prod)
   orderbus-prod:
+    container_name: smartbus-prod-OrderBus
     build:
       context: ./OrderBus
       dockerfile: Dockerfile
@@ -116,18 +79,9 @@ services:
       - routes-prod
       - RedisContainer
 
-  # Routes service (dev)
-  routes-dev:
-    build:
-      context: ./Routes
-      dockerfile: Dockerfile
-    environment:
-      - SPRING_PROFILES_ACTIVE=dev
-    ports:
-      - "6924:6924"
-
   # Routes service (prod)
   routes-prod:
+    container_name: smartbus-prod-Routes
     build:
       context: ./Routes
       dockerfile: Dockerfile
@@ -138,6 +92,7 @@ services:
 
   # Redis container (slimmed down)
   RedisContainer:
+    container_name: smartbus-prod-RedisContainer
     image: redis:7-alpine
     ports:
       - "6379:6379" # Redis default port

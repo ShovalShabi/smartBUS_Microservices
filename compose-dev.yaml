@@ -1,0 +1,104 @@
+# Docker Compose Configuration for PostgreSQL, Redis, and Microservices (Development Environment)
+
+version: '3.8'
+
+services:
+  # PostgresSQL container (development)
+  PostgresContainer:
+    container_name: smartbus-dev-PostgresContainer
+    image: postgres:14-alpine
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 12683579
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data-dev:/var/lib/postgresql/data
+      - ./db-init:/docker-entrypoint-initdb.d
+
+  # Auth service (dev)
+  auth-dev:
+    container_name: smartbus-dev-Auth
+    build:
+      context: ./Auth
+      dockerfile: Dockerfile
+    environment:
+      - SPRING_PROFILES_ACTIVE=dev
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://PostgresContainer:5432/AuthDBDev
+    ports:
+      - "3804:3804"
+    depends_on:
+      - PostgresContainer
+
+  # Feedback service (dev)
+  feedback-dev:
+    container_name: smartbus-dev-Feedback
+    build:
+      context: ./Feedback
+      dockerfile: Dockerfile
+    environment:
+      - SPRING_PROFILES_ACTIVE=dev
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://PostgresContainer:5432/FeedbackDBDev
+    ports:
+      - "5003:5003"
+    depends_on:
+      - PostgresContainer
+
+  # GTFS service (dev)
+  gtfs:
+    container_name: smartbus-dev-GTFS
+    build:
+      context: ./GTFS
+      dockerfile: Dockerfile
+    volumes:
+      - ./GTFS/dev/public:/app/GtfsScript/public # Mounting public folder for GTFS data
+      - ./GTFS/dev/config.yaml:/app/GtfsScript/config/config.yaml # Provide the dev/config.yaml file
+    depends_on:
+      - PostgresContainer
+    environment:
+      - POSTGRES_URL=jdbc:postgresql://PostgresContainer:5432/GTFSDev
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=12683579
+    ports:
+      - "8000:8000" # Or the port you need to expose for GTFS
+
+  # OrderBus service (dev)
+  orderbus-dev:
+    container_name: smartbus-dev-OrderBus
+    build:
+      context: ./OrderBus
+      dockerfile: Dockerfile
+    environment:
+      - SPRING_PROFILES_ACTIVE=dev
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://PostgresContainer:5432/GTFSDev
+    ports:
+      - "6936:6936"
+    depends_on:
+      - PostgresContainer
+      - gtfs
+      - routes-dev
+      - RedisContainer
+
+  # Routes service (dev)
+  routes-dev:
+    container_name: smartbus-dev-Routes
+    build:
+      context: ./Routes
+      dockerfile: Dockerfile
+    environment:
+      - SPRING_PROFILES_ACTIVE=dev
+    ports:
+      - "6924:6924"
+
+  # Redis container (development)
+  RedisContainer:
+    container_name: smartbus-dev-RedisContainer
+    image: redis:7-alpine
+    ports:
+      - "6379:6379" # Redis default port
+    volumes:
+      - redis-data-dev:/data
+
+volumes:
+  postgres-data-dev:
+  redis-data-dev:
