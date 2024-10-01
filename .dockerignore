@@ -1,0 +1,45 @@
+# Ignore Gradle files
+.gradle/
+build/
+
+# Ignore IntelliJ files
+.idea/
+*.iml
+*.ipr
+*.iws
+
+# Ignore logs and temporary files
+*.log
+*.tmp
+*.swp
+
+# Ignore local environment variables or configurations
+.env
+*.env
+
+# Ignore system files
+.DS_Store
+Thumbs.db
+
+# Ignore any temporary or OS-generated files
+*.bak
+*.orig
+*.rej
+*.swo
+*.swp
+
+# Ignore compiled files
+*.class
+
+# Ignore JARs/WARs that may have been generated locally
+*.jar
+*.war
+
+# Ignore target directory (for Maven builds if present)
+target/
+
+# Ignore test reports
+test-results/
+
+# Ignore logs from the application
+logs/
