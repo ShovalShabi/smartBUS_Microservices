@@ -82,7 +82,7 @@ Ensure Docker and Docker Compose are installed and running on your machine (see 
 
 ### Step 2: Build and Run the Docker Containers
 
-To run the services via Docker, use the `compose.yaml` file provided in the root directory.
+To run the services via Docker, use the `compose-*.yaml` files that provided in the root directory.
 
 1. Navigate to the project root directory:
    ```bash
@@ -94,14 +94,14 @@ To run the services via Docker, use the `compose.yaml` file provided in the root
    docker-compose -f compose-dev.yaml up --build -d 
    ```
 
-   For **production** mode with detached containers, use:
+   For **production** mode, build and run the services with detached containers:
    ```bash
    docker-compose -f compose-prod.yaml up --build -d
    ```
 
 ### Step 3: Access the Services
 
-Each service will be exposed on the respective port as defined in the `compose.yaml` file:
+Each service will be exposed on the respective port as defined in the `compose-dev.yaml` file:
 - **Auth service (dev)**: `http://localhost:3804`
 - **Feedback service (dev)**: `http://localhost:5003`
 - **OrderBus service (dev)**: `http://localhost:6936`
