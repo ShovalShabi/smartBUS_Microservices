@@ -1,7 +1,5 @@
 # Docker Compose Configuration for PostgreSQL, Redis, and Microservices (Development Environment)
 
-version: '3.8'
-
 services:
   # PostgresSQL container (development)
   PostgresContainer:
