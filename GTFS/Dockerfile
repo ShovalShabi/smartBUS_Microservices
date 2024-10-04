@@ -1,5 +1,5 @@
 # Use the official Python image as the base
-FROM python:3.9-slim
+FROM python:3.10-slim
 
 # Set the working directory inside the container
 WORKDIR /app
@@ -19,7 +19,7 @@ WORKDIR /app/GtfsScript
 RUN pip install -r requirements.txt
 
 # Copy the config.yaml file into the correct location inside the container
-COPY config.yaml /app/GtfsScript/config/config.yaml
+COPY */config.yaml /app/GtfsScript/config/config.yaml
 
 # Expose the GTFS public directory for external data
 VOLUME /app/GtfsScript/public
