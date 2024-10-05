@@ -18,8 +18,11 @@ WORKDIR /app/GtfsScript
 # Install the required Python dependencies
 RUN pip install -r requirements.txt
 
+# Define profile arg / default => dev
+ARG PROFILE=dev
+
 # Copy the config.yaml file into the correct location inside the container
-COPY */config.yaml /app/GtfsScript/config/config.yaml
+COPY ./${PROFILE}/config.yaml /app/GtfsScript/config/config.yaml
 
 # Expose the GTFS public directory for external data
 VOLUME /app/GtfsScript/public

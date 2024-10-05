@@ -48,6 +48,8 @@ services:
     build:
       context: ./GTFS
       dockerfile: Dockerfile
+      args:
+        PROFILE: dev
     volumes:
       - ./GTFS/dev/public:/app/GtfsScript/public # Mounting public folder for GTFS data
       - ./GTFS/dev/config.yaml:/app/GtfsScript/config/config.yaml # Provide the dev/config.yaml file
@@ -62,7 +64,8 @@ services:
     deploy:
       resources:
         limits:
-          memory: 2g   # Allocate 2GB of memory
+          cpus: "4.0"
+          memory: 6G
 
   # OrderBus service (dev)
   orderbus-dev:

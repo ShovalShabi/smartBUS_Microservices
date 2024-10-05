@@ -11,7 +11,8 @@ public class ConvertEntityToDto {
         return intermediateStations.map(lineStopEntity -> {
             return new Station(
                     lineStopEntity.getStopName(),
-                    new Location(new LatLng(lineStopEntity.getLat(), lineStopEntity.getLng()))
+                    new Location(new LatLng(lineStopEntity.getLat(), lineStopEntity.getLng())),
+                    lineStopEntity.getStopOrder()
             );
         });
     }

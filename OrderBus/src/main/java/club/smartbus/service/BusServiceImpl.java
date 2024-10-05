@@ -44,7 +44,7 @@ public class BusServiceImpl implements BusService {
      * @param stopStation       the name of the stop station (can be empty)
      * @param size              the number of stations to return per page
      * @param page              the page number to retrieve
-     * @return a {@link Flux< Station >} containing the paginated list of stations between the start and stop stations
+     * @return a {@link Flux<Station>} containing the paginated list of stations between the start and stop stations
      * @throws RuntimeException         if no stations are found for the provided line number or if the start/stop station is not found
      * @throws IllegalArgumentException if the start station is after the stop station
      */

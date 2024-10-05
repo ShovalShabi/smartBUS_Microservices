@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Data
 public class Station {
-    private String name;
+    private String stationName;
     private Location location;
+    private Integer stopOrder;
 }
