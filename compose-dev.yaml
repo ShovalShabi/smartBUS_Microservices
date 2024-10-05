@@ -58,7 +58,11 @@ services:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=12683579
     ports:
-      - "8000:8000" # Or the port you need to expose for GTFS
+      - "8000:8000"
+    deploy:
+      resources:
+        limits:
+          memory: 2g   # Allocate 2GB of memory
 
   # OrderBus service (dev)
   orderbus-dev:
