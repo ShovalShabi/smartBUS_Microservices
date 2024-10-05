@@ -25,6 +25,8 @@ jobs:
       - name: Build and Start Docker Compose Services
         run: |
           echo "Building and starting Docker Compose services..."
+          sudo apt-get update
+          sudo apt-get install -y docker-compose
           docker-compose -f compose-prod.yaml up --build -d
         # `--build` ensures the images are rebuilt.
         # `-d` runs the containers in the background.
