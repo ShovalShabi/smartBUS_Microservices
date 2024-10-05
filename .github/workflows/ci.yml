@@ -37,14 +37,14 @@ jobs:
           echo "Waiting for services to be healthy..."
           for i in {1..15}; do
             docker-compose -f compose-prod.yaml ps
-            if [ "$(docker-compose -f compose-prod.yaml ps | grep 'Up (healthy)' | wc -l)" -eq 6 ]; then
+            if [ "$(docker-compose -f compose-prod.yaml ps | grep 'Up (healthy)' | wc -l)" -eq 7 ]; then
               echo "All services are up and healthy!"
               break
             fi
             echo "Services are not ready yet... waiting 10 seconds"
             sleep 10
           done
-          if [ "$(docker-compose -f compose-prod.yaml ps | grep 'Up (healthy)' | wc -l)" -ne 6 ]; then
+          if [ "$(docker-compose -f compose-prod.yaml ps | grep 'Up (healthy)' | wc -l)" -ne 7 ]; then
             echo "Not all services became healthy in time." >&2
             exit 1
           fi
