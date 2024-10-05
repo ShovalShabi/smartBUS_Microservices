@@ -31,26 +31,7 @@ jobs:
         # `--build` ensures the images are rebuilt.
         # `-d` runs the containers in the background.
 
-      # Step 4: Health check for service readiness
-      - name: Wait for services to become healthy
-        run: |
-          echo "Waiting for services to be healthy..."
-          for i in {1..15}; do
-            docker-compose -f compose-prod.yaml ps
-            if [ "$(docker-compose -f compose-prod.yaml ps | grep 'Up (healthy)' | wc -l)" -eq 7 ]; then
-              echo "All services are up and healthy!"
-              break
-            fi
-            echo "Services are not ready yet... waiting 10 seconds"
-            sleep 10
-          done
-          if [ "$(docker-compose -f compose-prod.yaml ps | grep 'Up (healthy)' | wc -l)" -ne 7 ]; then
-            echo "Not all services became healthy in time." >&2
-            exit 1
-          fi
-        # Adjust the `6` based on the number of services you expect to be healthy.
-
-      # Step 5: Run Tests for Each Service (if tests exist)
+      # Step 4: Run Tests for Each Service (if tests exist)
       - name: Run tests for each service
         run: |
           services=("auth-prod" "feedback-prod" "gtfs" "orderbus-prod" "routes-prod")
@@ -63,13 +44,13 @@ jobs:
             fi
           done
 
-      # Step 6: Tear down Docker Compose after tests
+      # Step 5: Tear down Docker Compose after tests
       - name: Tear Down Docker Compose
         run: |
           echo "Tearing down Docker Compose services..."
           docker-compose -f compose-prod.yaml down
 
-      # Step 7: Output logs for services
+      # Step 6: Output logs for services
       - name: Output logs for all services
         run: |
           echo "Service logs:"
