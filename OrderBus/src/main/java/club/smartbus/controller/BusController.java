@@ -1,5 +1,7 @@
 package club.smartbus.controller;
 
+import club.smartbus.boundaries.stations.StationsRequest;
+import club.smartbus.boundaries.stops.StopsRequest;
 import club.smartbus.dto.transit.Station;
 import club.smartbus.service.BusService;
 import club.smartbus.utils.Constants;
@@ -19,14 +21,14 @@ public class BusController {
     private final BusService busService;
 
     @GetMapping(
-            path = {"/stationsByLine/{lineNumber}"},
+            path = {"/stations"},
             produces = APPLICATION_JSON_VALUE)
     public Flux<Station> getAllStops(
-            @PathVariable String lineNumber,
+            @RequestBody StationsRequest stationsRequest,
             @RequestParam(name = "size", required = false, defaultValue = Constants.DEFAULT_PAGE_SIZE) int size,
             @RequestParam(name = "page", required = false, defaultValue = Constants.DEFAULT_PAGE) int page,
             @RequestParam(name = "startStation", required = false, defaultValue = "") String startStation,
             @RequestParam(name = "stopStation", required = false, defaultValue = "") String stopStation) {
-        return busService.getBusLineStations(lineNumber, startStation, stopStation, size, page);
+        return busService.getBusLineStations(stationsRequest, startStation, stopStation, size, page);
     }
 }

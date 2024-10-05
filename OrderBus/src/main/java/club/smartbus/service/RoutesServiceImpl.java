@@ -130,6 +130,6 @@ public class RoutesServiceImpl implements RoutesService {
      * @return a {@link Flux<Station>} containing the stations between the origin and destination stations
      */
     private Flux<Station> getStationsBetweenInTransit(String lineNumber, String origin, String destination) {
-        return busService.getBusLineStations(lineNumber, origin, destination, Integer.parseInt(Constants.DEFAULT_PAGE_SIZE), Integer.parseInt(Constants.DEFAULT_PAGE));
+        return busService.getBusLineStations(null, origin, destination, Integer.parseInt(Constants.DEFAULT_PAGE_SIZE), Integer.parseInt(Constants.DEFAULT_PAGE));
     }
 }

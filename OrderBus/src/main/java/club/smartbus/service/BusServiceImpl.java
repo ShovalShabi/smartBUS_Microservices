@@ -1,5 +1,6 @@
 package club.smartbus.service;
 
+import club.smartbus.boundaries.stations.StationsRequest;
 import club.smartbus.dal.LineStopRepository;
 import club.smartbus.data.LineStopEntity;
 import club.smartbus.dto.transit.Station;
@@ -11,6 +12,7 @@ import reactor.core.publisher.Flux;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -37,25 +39,30 @@ public class BusServiceImpl implements BusService {
      *
      * <p>The method applies pagination based on the {@code size} and {@code page} parameters.</p>
      *
-     * @param lineNumber   the line number of the bus route
-     * @param startStation the name of the start station (can be empty)
-     * @param stopStation  the name of the stop station (can be empty)
-     * @param size         the number of stations to return per page
-     * @param page         the page number to retrieve
+     * @param stationsRequest   the line number and agency name of the bus route
+     * @param startStation      the name of the start station (can be empty)
+     * @param stopStation       the name of the stop station (can be empty)
+     * @param size              the number of stations to return per page
+     * @param page              the page number to retrieve
      * @return a {@link Flux< Station >} containing the paginated list of stations between the start and stop stations
      * @throws RuntimeException         if no stations are found for the provided line number or if the start/stop station is not found
      * @throws IllegalArgumentException if the start station is after the stop station
      */
     @Override
-    public Flux<Station> getBusLineStations(String lineNumber, String startStation, String stopStation, int size, int page) {
+    public Flux<Station> getBusLineStations(StationsRequest stationsRequest, String startStation, String stopStation, int size, int page) {
         // Fetch all stations for the line number
-        return lineStopRepository.findLineStopEntitiesByLineNumber(lineNumber)
+        return lineStopRepository.findLineStopEntitiesByLineNumber(stationsRequest.getLineNumber())
                 .collectList()
                 .flatMapMany(stopsList -> {
                     if (stopsList.isEmpty()) {
                         // If no stops are found, return a Flux error
-                        return Flux.error(new RuntimeException("No stations found for line number '" + lineNumber + "'"));
+                        return Flux.error(new RuntimeException("No stations found for line number '" + stationsRequest.getLineNumber() + "'"));
                     }
+
+                    // Filter for stops of the requested agency
+                    stopsList = stopsList.stream()
+                            .filter(station -> station.getAgency_name().equals(stationsRequest.getAgency()))
+                            .toList();
 
                     int startIndex = 0;
                     int endIndex = stopsList.size();

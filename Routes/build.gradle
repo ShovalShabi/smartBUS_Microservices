@@ -40,6 +40,12 @@ dependencies {
     // Spring Boot Starter WebFlux for reactive web applications
     implementation 'org.springframework.boot:spring-boot-starter-webflux'
 
+    // Spring Boot Starter Web for building web applications and applying netty as web server
+    implementation('org.springframework.boot:spring-boot-starter-web') {
+        exclude group: 'org.springframework.boot', module: 'spring-boot-starter-tomcat'
+    }
+    implementation 'org.springframework.boot:spring-boot-starter-reactor-netty'
+
     // Swagger-UI
     implementation 'org.springdoc:springdoc-openapi-starter-webflux-ui:2.3.0'
 

@@ -25,4 +25,7 @@ public class LineStopEntity {
 
     @Column("lng")
     private Double lng;            // Longitude of the stop
+
+    @Column("agency_name")
+    private String agency_name;            // Longitude of the stop
 }
