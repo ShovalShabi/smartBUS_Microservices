@@ -23,11 +23,11 @@ public class FeedbackDTO {
     /**
      * The rating provided by the user.
      *
-     * <p>This field cannot be null and must be a number greater than or equal to 0.
+     * <p>This field cannot be null and must be a number greater than or equal to 1.
      * A custom validation message is provided for invalid values.
      */
     @NotNull(message = "Rating cannot be null")
-    @Min(value = 0, message = "Rating must be at least 0")
+    @Min(value = 1, message = "Rating must be at least 1")
     private Double rating;
 
     /**
