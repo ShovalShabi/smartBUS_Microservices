@@ -1,10 +1,14 @@
 package club.smartbus.etc;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity;
 import org.springframework.security.config.web.server.ServerHttpSecurity;
 import org.springframework.security.web.server.SecurityWebFilterChain;
+import org.springframework.web.cors.CorsConfiguration;
+
+import java.util.List;
 
 import static org.springframework.security.config.Customizer.withDefaults;
 
@@ -17,6 +21,9 @@ import static org.springframework.security.config.Customizer.withDefaults;
 @Configuration
 @EnableWebFluxSecurity
 public class SecurityConfig {
+
+    @Value("${spring.config.client.orderbus}")
+    private String orderBusClientOrigin;
 
     /**
      * Configures the security filter chain for the WebFlux application.
@@ -31,13 +38,32 @@ public class SecurityConfig {
     @Bean
     public SecurityWebFilterChain securityWebFilterChain(ServerHttpSecurity http) {
         return http
-                .csrf(ServerHttpSecurity.CsrfSpec::disable)  // Disable CSRF for development purposes
+                // Disable CSRF protection for this configuration
+                .csrf(ServerHttpSecurity.CsrfSpec::disable)
+                // Configure CORS settings
+                .cors(corsSpec -> corsSpec.configurationSource(request -> {
+                    CorsConfiguration config = new CorsConfiguration();
+                    // Allow requests from the specified frontend origins (localhost on ports 6001 and 7001)
+                    config.setAllowedOrigins(List.of(orderBusClientOrigin));
+                    // Allow the following HTTP methods: GET, POST, PUT, DELETE, and OPTIONS
+                    config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+                    // Allow all headers in the request (no restriction on headers)
+                    config.setAllowedHeaders(List.of("*"));
+                    // Allow credentials such as cookies and tokens to be sent in cross-origin requests
+                    config.setAllowCredentials(true);
+                    // Return the CORS configuration to be applied
+                    return config;
+                }))
+
+                // Allow unrestricted access to all endpoints (no authentication required for any endpoint)
                 .authorizeExchange(authorize -> authorize
-                        .pathMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()  // Allow access to Swagger-UI endpoints without authentication
-                        .anyExchange().authenticated()  // Require authentication for all other endpoints
+                        .anyExchange().permitAll()  // Permit all requests to all endpoints without authentication
                 )
-                .httpBasic(withDefaults())  // Enable basic authentication for HTTP requests
-                .formLogin(withDefaults())  // Enable form-based login for browser-based requests
+                // Disable HTTP Basic Authentication (no username/password prompt for HTTP requests)
+                .httpBasic(ServerHttpSecurity.HttpBasicSpec::disable)
+                // Disable form-based login (no login page for browser-based requests)
+                .formLogin(ServerHttpSecurity.FormLoginSpec::disable)
+                // Build the security configuration and apply it
                 .build();
     }
 }
