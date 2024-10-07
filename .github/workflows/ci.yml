@@ -16,74 +16,84 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      # Step 1: Checkout the repository
       - name: Checkout repository
         uses: actions/checkout@v3
 
       - name: Log Step 1
         run: |
-          echo "Step 1: Checkout repository" | tee -a $GITHUB_WORKSPACE/ci_cd_log.txt
+          echo "Step 1: Checkout repository" | tee -a ci_cd_log.txt
 
+      # Step 2: Set up Java 17
       - name: Set up JDK 17
         uses: actions/setup-java@v3
         with:
           java-version: '17'
           distribution: 'temurin'
 
+      # Step 3: Convert gradlew to Unix line endings
       - name: Convert gradlew to Unix format
         run: |
           sudo apt-get update && sudo apt-get install -y dos2unix
           dos2unix ./gradlew
-          echo "Converted gradlew to Unix format" | tee -a $GITHUB_WORKSPACE/ci_cd_log.txt
+          echo "Converted gradlew to Unix format" | tee -a ci_cd_log.txt
 
+      # Step 4: Set execution permission for gradlew
       - name: Set execution permission for gradlew
         run: |
           chmod +x ./gradlew
-          echo "Execution permission set for gradlew" | tee -a $GITHUB_WORKSPACE/ci_cd_log.txt
+          echo "Execution permission set for gradlew" | tee -a ci_cd_log.txt
 
+      # Step 5: Run Tests for Each Service
       - name: Run tests for each service
         run: |
           services=("Auth" "Feedback" "GTFS" "OrderBus" "Routes")
           for service in "${services[@]}"; do
-            echo "Running tests for $service..." | tee -a $GITHUB_WORKSPACE/ci_cd_log.txt
-            echo "Current working directory before changing to $service:" | tee -a $GITHUB_WORKSPACE/ci_cd_log.txt
-            pwd | tee -a $GITHUB_WORKSPACE/ci_cd_log.txt
+            echo "Looking for tests in $service..." | tee -a ci_cd_log.txt
+            pwd | tee -a ci_cd_log.txt
             cd $service
             if [ -d "./src/test/java" ]; then
-              echo "Tests found for $service, running tests..." | tee -a $GITHUB_WORKSPACE/ci_cd_log.txt
-              pwd | tee -a $GITHUB_WORKSPACE/ci_cd_log.txt
+              echo "Tests found for $service, running tests..." | tee -a ci_cd_log.txt
+              pwd | tee -a ci_cd_log.txt
               ../gradlew test --no-daemon || exit 1
+              echo "The tests of $service passed successfully!" | tee -a ci_cd_log.txt
             else
-              echo "No tests found for $service, skipping..." | tee -a $GITHUB_WORKSPACE/ci_cd_log.txt
+              echo "No tests found for $service, skipping..." | tee -a ci_cd_log.txt
             fi
             cd ..
           done
 
+      # Step 6: Set up Docker Buildx
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
 
       - name: Log Step 2
         run: |
-          echo "Step 2: Set up Docker Buildx" | tee -a $GITHUB_WORKSPACE/ci_cd_log.txt
+          echo "Step 2: Set up Docker Buildx" | tee -a ci_cd_log.txt
 
+      # Step 7: Build and Start Docker Compose Services
       - name: Build and Start Docker Compose Services
         run: |
-          echo "Step 7: Build and Start Docker Compose Services" | tee -a $GITHUB_WORKSPACE/ci_cd_log.txt
-          sudo apt-get update | tee -a $GITHUB_WORKSPACE/ci_cd_log.txt
-          sudo apt-get install -y docker-compose | tee -a $GITHUB_WORKSPACE/ci_cd_log.txt
-          docker-compose -f compose-prod.yaml up --build -d | tee -a $GITHUB_WORKSPACE/ci_cd_log.txt
+          echo "Step 7: Build and Start Docker Compose Services" | tee -a ci_cd_log.txt
+          sudo apt-get update | tee -a ci_cd_log.txt
+          sudo apt-get install -y docker-compose | tee -a ci_cd_log.txt
+          docker-compose -f compose-prod.yaml up --build -d | tee -a ci_cd_log.txt
 
+      # Step 8: Tear down Docker Compose after tests
       - name: Tear Down Docker Compose
         run: |
-          echo "Tearing down Docker Compose services..." | tee -a $GITHUB_WORKSPACE/ci_cd_log.txt
-          docker-compose -f compose-prod.yaml down | tee -a $GITHUB_WORKSPACE/ci_cd_log.txt
+          echo "Tearing down Docker Compose services..." | tee -a ci_cd_log.txt
+          docker-compose -f compose-prod.yaml down | tee -a ci_cd_log.txt
 
+      # Step 9: Output logs for all services
       - name: Output logs for all services
         run: |
-          echo "Service logs:" | tee -a $GITHUB_WORKSPACE/ci_cd_log.txt
-          docker-compose logs | tee -a $GITHUB_WORKSPACE/ci_cd_log.txt
+          echo "Service logs:" | tee -a ci_cd_log.txt
+          docker-compose logs | tee -a ci_cd_log.txt
 
+      # Step 10: Upload log file
       - name: Upload log file
         uses: actions/upload-artifact@v3
         with:
           name: build-logs
-          path: $GITHUB_WORKSPACE/ci_cd_log.txt
+          path: ci_cd_log.txt
