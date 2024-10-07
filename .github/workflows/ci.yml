@@ -83,7 +83,7 @@ jobs:
           docker-compose logs | tee -a $GITHUB_WORKSPACE/ci_cd_log.txt
 
       - name: Upload log file
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: build-logs
           path: $GITHUB_WORKSPACE/ci_cd_log.txt
