@@ -52,7 +52,9 @@ services:
         PROFILE: dev
     volumes:
       - ./GTFS/dev/public:/app/GtfsScript/public # Mounting public folder for GTFS data
-      - ./GTFS/dev/config.yaml:/app/GtfsScript/config/config.yaml # Provide the dev/config.yaml file
+      - type: bind
+        source: ./GTFS/dev/config.yaml
+        target: /app/GtfsScript/config/config.yaml
     depends_on:
       - PostgresContainer
     environment:
