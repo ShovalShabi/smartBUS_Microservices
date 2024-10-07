@@ -16,6 +16,7 @@ import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -64,7 +65,8 @@ class FeedbackServiceImplTest {
     @Test
     void testCreateFeedbackToCompany_Success() {
         // Arrange
-        FeedbackDTO feedbackDTO = new FeedbackDTO(5.0, "Egged", "123", "user@domain.com", "Great service", LocalDateTime.now());
+        LocalDateTime now = LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS); // Truncate to seconds to avoid precision issues
+        FeedbackDTO feedbackDTO = new FeedbackDTO(5.0, "Egged", "123", "user@domain.com", "Great service", now);
         FeedbackEntity feedbackEntity = new FeedbackEntity(feedbackDTO);
         feedbackEntity.setId(UUID.randomUUID());
 
@@ -76,12 +78,20 @@ class FeedbackServiceImplTest {
 
         // Assert
         StepVerifier.create(result)
-                .expectNext(feedbackDTO)
+                .expectNextMatches(savedFeedbackDTO ->
+                        savedFeedbackDTO.getRating().equals(feedbackDTO.getRating()) &&
+                                savedFeedbackDTO.getAgency().equals(feedbackDTO.getAgency()) &&
+                                savedFeedbackDTO.getLineNumber().equals(feedbackDTO.getLineNumber()) &&
+                                savedFeedbackDTO.getUserEmail().equals(feedbackDTO.getUserEmail()) &&
+                                savedFeedbackDTO.getAdditionalDetails().equals(feedbackDTO.getAdditionalDetails()) &&
+                                savedFeedbackDTO.getCreationTimestamp().truncatedTo(ChronoUnit.SECONDS).equals(feedbackDTO.getCreationTimestamp()) // Truncate timestamp to seconds for comparison
+                )
                 .verifyComplete();
 
         verify(validator).validate(eq(feedbackDTO), any(BeanPropertyBindingResult.class));
         verify(feedbackRepository).save(any(FeedbackEntity.class));
     }
+
 
     /**
      * Tests the failure of feedback creation due to validation errors.
