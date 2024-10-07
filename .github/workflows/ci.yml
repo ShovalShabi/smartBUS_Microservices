@@ -50,7 +50,6 @@ jobs:
           services=("Auth" "Feedback" "GTFS" "OrderBus" "Routes")
           for service in "${services[@]}"; do
             echo "Looking for tests in $service..." | tee -a ci_cd_log.txt
-            pwd | tee -a ci_cd_log.txt
             if [ -d "./$service/src/test/java" ]; then
               echo "Tests found for $service, running tests..." | tee -a ci_cd_log.txt
               cd $service
