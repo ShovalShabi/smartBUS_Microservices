@@ -51,16 +51,16 @@ jobs:
           for service in "${services[@]}"; do
             echo "Looking for tests in $service..." | tee -a ci_cd_log.txt
             pwd | tee -a ci_cd_log.txt
-            cd $service
-            if [ -d "./src/test/java" ]; then
+            if [ -d "./$service/src/test/java" ]; then
               echo "Tests found for $service, running tests..." | tee -a ci_cd_log.txt
-              pwd | tee -a ci_cd_log.txt
-              ../gradlew test --no-daemon || exit 1
+              cd $service
+              pwd | tee -a ci_cd_log.txt  # Confirm current working directory
+              ../gradlew test --no-daemon || exit 1  # Run the tests using ./gradlew
               echo "The tests of $service passed successfully!" | tee -a ci_cd_log.txt
+              cd ..
             else
               echo "No tests found for $service, skipping..." | tee -a ci_cd_log.txt
             fi
-            cd ..
           done
 
       # Step 6: Set up Docker Buildx
