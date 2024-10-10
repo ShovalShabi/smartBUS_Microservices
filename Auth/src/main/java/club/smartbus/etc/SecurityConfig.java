@@ -78,6 +78,7 @@ public class SecurityConfig {
     public SecurityWebFilterChain securityWebFilterChain(ServerHttpSecurity http) {
         return http
                 .csrf(ServerHttpSecurity.CsrfSpec::disable)  // Disable CSRF for development purposes
+                .cors(withDefaults()) // Make sure CORS is enabled
                 .authorizeExchange(authorize -> authorize
                         // Disable security for Swagger and API documentation endpoints
                         .pathMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-resources/**", "/webjars/**").permitAll()

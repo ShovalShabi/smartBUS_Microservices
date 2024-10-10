@@ -6,6 +6,8 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.security.config.web.server.ServerHttpSecurity;
 import org.springframework.security.web.server.SecurityWebFilterChain;
 
+import static org.springframework.security.config.Customizer.withDefaults;
+
 /**
  * Configuration class that defines the security settings for development and test environments.
  * <p>
@@ -34,6 +36,7 @@ public class DevSecurityConfig {
     public SecurityWebFilterChain devSecurityWebFilterChain(ServerHttpSecurity http) {
         return http
                 .csrf(ServerHttpSecurity.CsrfSpec::disable)  // Disable CSRF for development purposes
+                .cors(withDefaults()) // Make sure CORS is enabled
                 .authorizeExchange(authorize -> authorize
                         .pathMatchers("/**").permitAll()  // Allow all requests without authentication in dev/test
                 )
