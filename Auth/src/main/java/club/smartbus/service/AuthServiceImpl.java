@@ -7,8 +7,10 @@ import club.smartbus.utils.JWTUtil;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 import reactor.core.publisher.Mono;
 
 /**
@@ -53,7 +55,7 @@ public class AuthServiceImpl implements AuthService {
                     // Log and ensure the password is not null
                     if (userDTO.getPassword() == null) {
                         log.error("Password for user {} is null!", userDTO.getOrganizationEmail());
-                        return Mono.error(new IllegalArgumentException("Password cannot be null"));
+                        return Mono.error(new ResponseStatusException(HttpStatus.BAD_REQUEST, "Password cannot be null"));
                     }
 
                     // Encrypt the password
@@ -93,7 +95,7 @@ public class AuthServiceImpl implements AuthService {
                     // Step 1: Check if the password matches
                     if (!passwordEncoder.matches(password, userEntity.getPassword())) {
                         log.warn("Login attempt failed for user: {} in company: {}. Invalid credentials.", email, company);
-                        return Mono.error(new RuntimeException("Invalid credentials"));
+                        return Mono.error(new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid credentials"));
                     }
 
                     // Step 2: If the user exists and password is correct, handle the JWT token
@@ -130,7 +132,7 @@ public class AuthServiceImpl implements AuthService {
                 // Step 1: If user is not found, log and return an error
                 .switchIfEmpty(Mono.defer(() -> {
                     log.error("Login attempt failed for user: {} in company: {}. User not registered.", email, company);
-                    return Mono.error(new RuntimeException("User not found"));
+                    return Mono.error(new ResponseStatusException(HttpStatus.BAD_REQUEST, "User not found"));
                 }));
     }
 

@@ -10,11 +10,14 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.web.server.ResponseStatusException;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
-import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
 /**
@@ -150,18 +153,21 @@ class AuthServiceImplTest {
         // Arrange
         UserEntity userEntity = new UserEntity("John", "Doe", "Company", "john.doe@domain.com", "encodedPassword", null);
 
+        // Ensure the user exists, but the password does not match
         when(userRepository.findById(anyString())).thenReturn(Mono.just(userEntity));
-        when(passwordEncoder.matches(anyString(), anyString())).thenReturn(false);
+        when(passwordEncoder.matches(anyString(), anyString())).thenReturn(false); // Simulate invalid password
 
         // Act
         Mono<UserDTO> result = authService.userLogin("Company", "john.doe@domain.com", "wrongPassword");
 
         // Assert
         StepVerifier.create(result)
-                .expectErrorMatches(throwable -> throwable instanceof RuntimeException &&
-                        throwable.getMessage().equals("Invalid credentials"))
+                .expectErrorMatches(throwable -> throwable instanceof ResponseStatusException &&
+                        ((ResponseStatusException) throwable).getStatusCode() == HttpStatus.UNAUTHORIZED &&
+                        throwable.getMessage().contains("Invalid credentials"))
                 .verify();
 
+        // Verify interactions
         verify(userRepository).findById(anyString());
         verify(passwordEncoder).matches(anyString(), anyString());
     }
