@@ -11,8 +11,8 @@ import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -64,17 +64,27 @@ public class BusServiceImpl implements BusService {
                             .filter(station -> station.getAgency_name().equals(stationsRequest.getAgency()))
                             .toList();
 
+                    // Find the requested direction vector of stations
+
                     int startIndex = 0;
                     int endIndex = stopsList.size();
 
                     // Determine start index if startStation is provided
                     if (startStation != null && !startStation.isEmpty()) {
                         Optional<LineStopEntity> startEntityOpt = stopsList.stream()
-                                .filter(stop -> stop.getStopName().equals(startStation))
+                                .filter(stop -> stop.getStopName().equals(startStation) && stop.getStopOrder() == 1)
                                 .findFirst();
 
                         if (startEntityOpt.isPresent()) {
-                            startIndex = startEntityOpt.get().getStopOrder();
+                            LineStopEntity startEntity = startEntityOpt.get();
+                            for (int i = 0; i < stopsList.size(); i++) {
+                                LineStopEntity stop = stopsList.get(i);
+                                if (stop.getStopName().equals(startEntity.getStopName()) &&
+                                        Objects.equals(stop.getStopOrder(), startEntity.getStopOrder())) {
+                                    startIndex = i;
+                                    break;
+                                }
+                            }
                         }
                     }
 
@@ -95,8 +105,8 @@ public class BusServiceImpl implements BusService {
                         return Flux.empty();
                     }
 
-                    // Return the sublist based on calculated start and end indexes
-                    List<LineStopEntity> result = stopsList.subList(startIndex, endIndex - 1);
+                    // Return a sublist from the start to the identified endIndex (exclusive)
+                    List<LineStopEntity> result = ConvertEntityToDto.getSubListOfSingleDirection(stopsList, startIndex);
                     return ConvertEntityToDto.convertLineStopToStation(Flux.fromIterable(result));
                 });
     }
