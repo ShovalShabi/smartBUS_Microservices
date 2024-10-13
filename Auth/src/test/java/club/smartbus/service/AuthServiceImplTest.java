@@ -132,7 +132,7 @@ class AuthServiceImplTest {
         when(jwtUtil.generateToken(anyString())).thenReturn("newToken");
 
         // Act
-        Mono<UserDTO> result = authService.userLogin("Company", "john.doe@domain.com", "password");
+        Mono<UserDTO> result = authService.userLogin("john.doe@domain.com", "password");
 
         // Assert
         StepVerifier.create(result)
@@ -158,7 +158,7 @@ class AuthServiceImplTest {
         when(passwordEncoder.matches(anyString(), anyString())).thenReturn(false); // Simulate invalid password
 
         // Act
-        Mono<UserDTO> result = authService.userLogin("Company", "john.doe@domain.com", "wrongPassword");
+        Mono<UserDTO> result = authService.userLogin("john.doe@domain.com", "wrongPassword");
 
         // Assert
         StepVerifier.create(result)

@@ -91,12 +91,12 @@ public class AuthControllerTest {
         // Arrange
         UserDTO userDTO = new UserDTO("John", "Doe", "Company", "john.doe@domain.com", "token", null);
 
-        when(authService.userLogin(anyString(), anyString(), anyString())).thenReturn(Mono.just(userDTO));
+        when(authService.userLogin(anyString(), anyString())).thenReturn(Mono.just(userDTO));
 
         // Act and Assert
         webTestClient.post()
                 .uri(uriBuilder -> uriBuilder
-                        .path("/auth/Company")
+                        .path("/auth")
                         .queryParam("email", "john.doe@domain.com")
                         .queryParam("password", "password")
                         .build())
@@ -107,7 +107,7 @@ public class AuthControllerTest {
                     assert response.getPassword().equals("token");
                 });
 
-        verify(authService).userLogin(anyString(), anyString(), anyString());
+        verify(authService).userLogin(anyString(), anyString());
     }
 
     /**

@@ -34,12 +34,11 @@ public interface AuthService {
      * is not found, it emits an error.
      * </p>
      *
-     * @param company  the name of the company the user belongs to.
      * @param email    the email of the user trying to log in.
      * @param password the password of the user trying to log in.
      * @return a {@link Mono} emitting the user details along with a JWT token as a {@link UserDTO} or an error if login fails.
      */
-    Mono<UserDTO> userLogin(String company, String email, String password);
+    Mono<UserDTO> userLogin(String email, String password);
 
     /**
      * Deletes all users in the database for testing purposes.

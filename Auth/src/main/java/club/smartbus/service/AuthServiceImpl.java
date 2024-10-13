@@ -83,18 +83,17 @@ public class AuthServiceImpl implements AuthService {
      * it emits an error.
      * </p>
      *
-     * @param company  the name of the company the user belongs to.
      * @param email    the email of the user trying to log in.
      * @param password the password of the user trying to log in.
      * @return a {@link Mono} emitting the user details along with a JWT token as a {@link UserDTO} or an error if login fails.
      */
     @Override
-    public Mono<UserDTO> userLogin(String company, String email, String password) {
+    public Mono<UserDTO> userLogin(String email, String password) {
         return userRepository.findById(email)
                 .flatMap(userEntity -> {
                     // Step 1: Check if the password matches
                     if (!passwordEncoder.matches(password, userEntity.getPassword())) {
-                        log.warn("Login attempt failed for user: {} in company: {}. Invalid credentials.", email, company);
+                        log.warn("Login attempt failed for user: {}, invalid credentials.", email);
                         return Mono.error(new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid credentials"));
                     }
 
@@ -131,7 +130,7 @@ public class AuthServiceImpl implements AuthService {
                 })
                 // Step 1: If user is not found, log and return an error
                 .switchIfEmpty(Mono.defer(() -> {
-                    log.error("Login attempt failed for user: {} in company: {}. User not registered.", email, company);
+                    log.error("Login attempt failed for user: {}, user not registered.", email);
                     return Mono.error(new ResponseStatusException(HttpStatus.BAD_REQUEST, "User not found"));
                 }));
     }

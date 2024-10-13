@@ -42,19 +42,17 @@ public class AuthController {
     /**
      * Authenticates a user for the specified company.
      *
-     * @param company  The company to which the user belongs.
      * @param email    The email of the user trying to log in.
      * @param password The password of the user trying to log in.
      * @return A {@link Mono} emitting the authenticated {@link UserDTO} with a JWT token if successful.
      */
     @PostMapping(
-            path = {"/auth/{company}"},
+            path = {"/auth"},
             produces = {MediaType.APPLICATION_JSON_VALUE})
-    public Mono<UserDTO> userLogin(@PathVariable String company,
-                                   @RequestParam String email,
+    public Mono<UserDTO> userLogin(@RequestParam String email,
                                    @RequestParam String password) {
-        log.info("Login attempt for user: {}, for company: {}", email, company);
-        return authService.userLogin(company, email, password);
+        log.info("Login attempt for user: {}", email);
+        return authService.userLogin(email, password);
     }
 
     /**
