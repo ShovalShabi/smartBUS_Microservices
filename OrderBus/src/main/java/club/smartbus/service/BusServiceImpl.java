@@ -1,6 +1,6 @@
 package club.smartbus.service;
 
-import club.smartbus.boundaries.stations.StationsRequest;
+import club.smartbus.dto.stations.StationsRequest;
 import club.smartbus.dal.LineStopRepository;
 import club.smartbus.data.LineStopEntity;
 import club.smartbus.dto.transit.LatLng;

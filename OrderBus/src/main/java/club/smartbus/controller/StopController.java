@@ -1,7 +1,7 @@
 package club.smartbus.controller;
 
-import club.smartbus.boundaries.stops.StopsRequest;
-import club.smartbus.boundaries.stops.StopsResponse;
+import club.smartbus.dto.stops.StopsRequest;
+import club.smartbus.dto.stops.StopsResponse;
 import club.smartbus.service.StopService;
 import club.smartbus.utils.Constants;
 import lombok.RequiredArgsConstructor;

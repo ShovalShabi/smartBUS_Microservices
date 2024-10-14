@@ -1,6 +1,6 @@
-package club.smartbus.boundaries.stops;
+package club.smartbus.dto.stops;
 
-import club.smartbus.boundaries.routes.RouteResponse;
+import club.smartbus.dto.routes.RouteResponse;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

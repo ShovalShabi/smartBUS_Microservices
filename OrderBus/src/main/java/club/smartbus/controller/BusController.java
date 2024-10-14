@@ -1,6 +1,6 @@
 package club.smartbus.controller;
 
-import club.smartbus.boundaries.stations.StationsRequest;
+import club.smartbus.dto.stations.StationsRequest;
 import club.smartbus.dto.transit.Station;
 import club.smartbus.service.BusService;
 import club.smartbus.utils.Constants;

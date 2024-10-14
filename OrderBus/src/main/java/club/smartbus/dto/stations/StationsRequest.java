@@ -1,4 +1,4 @@
-package club.smartbus.boundaries.stations;
+package club.smartbus.dto.stations;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
