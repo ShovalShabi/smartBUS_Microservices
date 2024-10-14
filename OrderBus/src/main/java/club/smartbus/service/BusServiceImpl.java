@@ -3,12 +3,14 @@ package club.smartbus.service;
 import club.smartbus.boundaries.stations.StationsRequest;
 import club.smartbus.dal.LineStopRepository;
 import club.smartbus.data.LineStopEntity;
+import club.smartbus.dto.transit.LatLng;
 import club.smartbus.dto.transit.Station;
 import club.smartbus.utils.ConvertEntityToDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 import java.util.List;
 import java.util.Objects;
@@ -39,11 +41,11 @@ public class BusServiceImpl implements BusService {
      *
      * <p>The method applies pagination based on the {@code size} and {@code page} parameters.</p>
      *
-     * @param stationsRequest   the line number and agency name of the bus route
-     * @param startStation      the name of the start station (can be empty)
-     * @param stopStation       the name of the stop station (can be empty)
-     * @param size              the number of stations to return per page
-     * @param page              the page number to retrieve
+     * @param stationsRequest the line number and agency name of the bus route
+     * @param startStation    the name of the start station (can be empty)
+     * @param stopStation     the name of the stop station (can be empty)
+     * @param size            the number of stations to return per page
+     * @param page            the page number to retrieve
      * @return a {@link Flux<Station>} containing the paginated list of stations between the start and stop stations
      * @throws RuntimeException         if no stations are found for the provided line number or if the start/stop station is not found
      * @throws IllegalArgumentException if the start station is after the stop station
@@ -110,5 +112,45 @@ public class BusServiceImpl implements BusService {
                     return ConvertEntityToDto.convertLineStopToStation(Flux.fromIterable(result));
                 });
     }
+
+
+    /**
+     * Retrieves the bus lines of agencies that operate buses which passing through both the start and end locations.
+     *
+     * <p>This method cross-checks the bus stops at the start location and the end location and returns the names
+     * of the agencies that pass through both stops.</p>
+     *
+     * @param startLocation The geographical location (latitude, longitude) of the start bus stop.
+     * @param endLocation   The geographical location (latitude, longitude) of the destination bus stop.
+     * @return A Flux<String> containing the names of the agencies that have buses passing through both the start and end locations.
+     */
+    @Override
+    public Flux<String> getRelevantBusLineByStartAndDestinationLocation(LatLng startLocation, LatLng endLocation) {
+
+        // Step 1: Find all agencies that have a stop at the start location using latitude and longitude.
+        // This returns a Flux of LineStopEntity objects representing bus stops at the start location.
+        Flux<LineStopEntity> startStationAgencies = lineStopRepository.findByLineNumbersByStationLocation(
+                startLocation.getLatitude(), startLocation.getLongitude());
+
+        // Step 2: Find all agencies that have a stop at the end location using latitude and longitude.
+        // This returns a Flux of LineStopEntity objects representing bus stops at the end location.
+        Flux<LineStopEntity> endStationAgencies = lineStopRepository.findByLineNumbersByStationLocation(
+                endLocation.getLatitude(), endLocation.getLongitude());
+
+        // Step 3: Compare agencies from the start and end locations.
+        // For each start station, check if any end station belongs to the same agency.
+        // Map the matching agency name and ensure no duplicate names are returned using 'distinct()'.
+        return startStationAgencies
+                .flatMap(startStation -> endStationAgencies
+                        .filter(endStation -> startStation.getLineNumber().equals(endStation.getLineNumber()))
+                        .map(LineStopEntity::getLineNumber)) // Map the agency name from the matching start and end stations.
+                .distinct(); // Ensure no duplicate agency names are returned.
+    }
+
+    @Override
+    public Mono<String> findStationNameByLatitudeAndLongitude(LatLng coordinate) {
+        return lineStopRepository.findStationNameByLatitudeAndLongitude(coordinate.getLatitude(), coordinate.getLongitude());
+    }
+
 
 }

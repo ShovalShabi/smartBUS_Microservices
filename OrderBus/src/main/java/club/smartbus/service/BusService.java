@@ -1,9 +1,15 @@
 package club.smartbus.service;
 
 import club.smartbus.boundaries.stations.StationsRequest;
+import club.smartbus.dto.transit.LatLng;
 import club.smartbus.dto.transit.Station;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 public interface BusService {
     Flux<Station> getBusLineStations(StationsRequest stationsRequest, String startStation, String stopStation, int size, int page);
+
+    Flux<String> getRelevantBusLineByStartAndDestinationLocation(LatLng startLocation, LatLng endLocation);
+
+    Mono<String> findStationNameByLatitudeAndLongitude(LatLng coordinate);
 }
