@@ -22,15 +22,30 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+/**
+ * WebSocket handler responsible for managing WebSocket connections and messages
+ * between the OrderBusClient (passenger) and DriverConsole (driver) clients.
+ * Handles the lifecycle of WebSocket sessions, message broadcasting, and message processing.
+ */
 @Slf4j
 @AllArgsConstructor
 @Data
 @Component
 public class BusWebSocketHandler implements WebSocketHandler {
 
+    /**
+     * Object mapper used to convert incoming WebSocket messages to Java objects.
+     */
     private final ObjectMapper objectMapper;
+
+    /**
+     * Manages WebSocket sessions, including storing and broadcasting messages.
+     */
     private final WebSocketSessionManager sessionManager;
 
+    /**
+     * Service responsible for bus-related logic, such as retrieving bus lines and stations.
+     */
     @Autowired
     private final BusService busService;
 
@@ -52,7 +67,7 @@ public class BusWebSocketHandler implements WebSocketHandler {
     }
 
     /**
-     * Handles incoming WebSocket messages for both OrderBusClient and DriverConsole clients.
+     * Handles incoming WebSocket messages for both OrderBusClient (passenger) and DriverConsole (driver) clients.
      *
      * @param session the WebSocket session.
      * @param message the incoming WebSocket message.
@@ -214,11 +229,11 @@ public class BusWebSocketHandler implements WebSocketHandler {
     }
 
     /**
-     * Broadcast a WebSocket message to a list of WebSocket sessions.
+     * Broadcasts a WebSocket message to a list of WebSocket sessions.
      *
-     * @param sessions   The list of {@link WebSocketSession} to send the message to.
-     * @param message    The {@link WebSocketMessage} to be broadcast (either {@link PassengerWSMessage} or {@link DriverWSMessage}).
-     * @param clientType The type of client sending the message: "OrderBusClient" for passengers or "DriverConsole" for drivers.
+     * @param sessions   the list of {@link WebSocketSession} to send the message to.
+     * @param message    the {@link WebSocketMessage} to be broadcast (either {@link PassengerWSMessage} or {@link DriverWSMessage}).
+     * @param clientType the type of client sending the message: "OrderBusClient" for passengers or "DriverConsole" for drivers.
      */
     public void broadcastMessage(List<WebSocketSession> sessions, WebSocketMessage message, String clientType) {
         for (WebSocketSession session : sessions) {

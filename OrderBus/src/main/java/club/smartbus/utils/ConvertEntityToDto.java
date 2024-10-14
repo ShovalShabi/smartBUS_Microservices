@@ -4,15 +4,28 @@ import club.smartbus.data.LineStopEntity;
 import club.smartbus.dto.transit.LatLng;
 import club.smartbus.dto.transit.Location;
 import club.smartbus.dto.transit.Station;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Flux;
 
 import java.util.List;
 
+/**
+ * Utility class for converting entities to DTOs.
+ * This class contains helper methods for converting {@link LineStopEntity} objects into {@link Station} DTOs
+ * and for extracting sublists of stations in a single direction based on stop order.
+ */
+@Slf4j
 public class ConvertEntityToDto {
-    private static final Logger log = LoggerFactory.getLogger(ConvertEntityToDto.class);
 
+    /**
+     * Converts a {@link Flux} of {@link LineStopEntity} objects to a {@link Flux} of {@link Station} DTOs.
+     *
+     * <p>This method maps each {@link LineStopEntity} to its corresponding {@link Station} DTO. The mapping
+     * includes converting latitude and longitude values into {@link LatLng} and wrapping them in a {@link Location} object.</p>
+     *
+     * @param intermediateStations a {@link Flux} of {@link LineStopEntity} objects representing bus stops.
+     * @return a {@link Flux<Station>} containing the mapped {@link Station} DTOs.
+     */
     public static Flux<Station> convertLineStopToStation(Flux<LineStopEntity> intermediateStations) {
         return intermediateStations.map(lineStopEntity -> {
             return new Station(
@@ -23,6 +36,19 @@ public class ConvertEntityToDto {
         });
     }
 
+    /**
+     * Extracts a sublist of bus stops that follow a single direction based on stop order.
+     *
+     * <p>This method starts from the given {@code startIndex} in the list and continues to the next stop until
+     * it finds a stop where the order decreases, indicating a change in direction. It returns a sublist that
+     * includes all the stops in the same direction as the starting point.</p>
+     *
+     * <p>If the list contains fewer than 2 stops, the original list is returned.</p>
+     *
+     * @param stops      a {@link List} of {@link LineStopEntity} representing bus stops along a route.
+     * @param startIndex the index of the first stop in the sublist.
+     * @return a sublist of stops that follow a single direction based on stop order.
+     */
     public static List<LineStopEntity> getSubListOfSingleDirection(List<LineStopEntity> stops, int startIndex) {
         log.info("Start from station at index:{}", startIndex);
         if (stops == null || stops.size() <= 1)

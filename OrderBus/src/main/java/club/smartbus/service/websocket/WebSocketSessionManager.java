@@ -12,17 +12,29 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketMessage;
 import org.springframework.web.socket.WebSocketSession;
+
 import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
+/**
+ * Manages WebSocket sessions for both passengers and drivers, allowing the system to send and store WebSocket messages.
+ * This class interacts with Redis for session management, stores payloads, and broadcasts messages to relevant sessions.
+ */
 @Slf4j
 @Data
 @Component
 public class WebSocketSessionManager {
 
+    /**
+     * RedisTemplate for storing and retrieving WebSocket session data (e.g., messages for passengers or drivers).
+     */
     private final RedisTemplate<String, Object> redisTemplateForData;
+
+    /**
+     * A thread-safe map that stores active WebSocket sessions, with session IDs as keys.
+     */
     private final ConcurrentHashMap<String, WebSocketSession> sessionMap = new ConcurrentHashMap<>();
 
     @Autowired
@@ -31,7 +43,7 @@ public class WebSocketSessionManager {
     }
 
     /**
-     * Add a WebSocket session to the ConcurrentHashMap using session ID as key.
+     * Adds a WebSocket session to the ConcurrentHashMap using the session ID as the key.
      *
      * @param session WebSocketSession to store.
      */
@@ -45,7 +57,7 @@ public class WebSocketSessionManager {
     }
 
     /**
-     * Add and open a WebSocket session message to Redis using session ID as key.
+     * Stores a WebSocket message payload in Redis, using the session ID as the key.
      * The payload can be either a PassengerWSMessage or DriverWSMessage.
      *
      * @param payload WebSocket payload to store.
@@ -60,9 +72,8 @@ public class WebSocketSessionManager {
         }
     }
 
-
     /**
-     * Close and remove a WebSocket session and its payload from the ConcurrentHashMap and Redis.
+     * Closes and removes a WebSocket session from the ConcurrentHashMap and its payload from Redis.
      *
      * @param session WebSocketSession used to retrieve the session ID.
      */
@@ -101,7 +112,6 @@ public class WebSocketSessionManager {
                 case "DriverConsole" -> {
                     DriverWSMessage driverWSMessage = (DriverWSMessage) message;
                     textMessage = new TextMessage(driverWSMessage.getPayload());
-
                 }
             }
             if (textMessage == null)
@@ -140,7 +150,7 @@ public class WebSocketSessionManager {
     }
 
     /**
-     * Retrieve all WebSocket sessions where the PassengerWSMessage has the given startLocation.
+     * Retrieves all WebSocket sessions where the PassengerWSMessage has the given startLocation.
      *
      * @param coordinate the LatLng coordinate to match against the startLocation in PassengerWSMessage.
      * @return a list of WebSocket sessions of passengers with matching startLocation.
@@ -157,10 +167,8 @@ public class WebSocketSessionManager {
                 .collect(Collectors.toList()); // Collect the valid WebSocket sessions
     }
 
-
-
     /**
-     * Retrieve all driver WebSocket sessions where the DriverWSMessage contains a lineNumber that matches one of the provided bus lines
+     * Retrieves all driver WebSocket sessions where the DriverWSMessage contains a lineNumber that matches one of the provided bus lines
      * and where the station represented by the LatLng object has not been visited yet.
      *
      * @param relevantBusLines a set of bus lines to match against the lineNumber in DriverWSMessage.
@@ -187,7 +195,4 @@ public class WebSocketSessionManager {
                 .filter(Objects::nonNull) // Ensure session is not null
                 .collect(Collectors.toList()); // Collect the valid WebSocket sessions
     }
-
-
-
 }
