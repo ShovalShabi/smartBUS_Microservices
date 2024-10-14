@@ -1,7 +1,7 @@
 package club.smartbus.service;
 
-import club.smartbus.dto.stops.StopsRequest;
-import club.smartbus.dto.stops.StopsResponse;
+import club.smartbus.dto.stops.StopsRequestDTO;
+import club.smartbus.dto.stops.StopsResponseDTO;
 import club.smartbus.dal.LineStopRepository;
 import club.smartbus.data.LineStopEntity;
 import lombok.RequiredArgsConstructor;
@@ -26,19 +26,19 @@ public class StopServiceImpl implements StopService {
     /**
      * Retrieves bus stops along the routes with intermediate stations.
      *
-     * <p>This method uses the {@link RoutesService#getRoutesWithIntermediateStations(StopsRequest)} to fetch
-     * route details with intermediate stops based on the provided {@link StopsRequest}. The resulting route details
-     * are mapped to {@link StopsResponse} objects.</p>
+     * <p>This method uses the {@link RoutesService#getRoutesWithIntermediateStations(StopsRequestDTO)} to fetch
+     * route details with intermediate stops based on the provided {@link StopsRequestDTO}. The resulting route details
+     * are mapped to {@link StopsResponseDTO} objects.</p>
      *
-     * @param stopsRequest the request containing the route information for which stops need to be retrieved.
+     * @param stopsRequestDTO the request containing the route information for which stops need to be retrieved.
      * @param size         the number of stops to return per page.
      * @param page         the page number to retrieve.
-     * @return a {@link Flux<StopsResponse>} containing the stop details for the requested route.
+     * @return a {@link Flux< StopsResponseDTO >} containing the stop details for the requested route.
      */
     @Override
-    public Flux<StopsResponse> getAll(StopsRequest stopsRequest, int size, int page) {
-        return routesService.getRoutesWithIntermediateStations(stopsRequest)
-                .flatMap(routeResponse -> Mono.just(new StopsResponse(routeResponse)));
+    public Flux<StopsResponseDTO> getAll(StopsRequestDTO stopsRequestDTO, int size, int page) {
+        return routesService.getRoutesWithIntermediateStations(stopsRequestDTO)
+                .flatMap(routeResponse -> Mono.just(new StopsResponseDTO(routeResponse)));
     }
 
     /*  ADMIN COMMANDS  */

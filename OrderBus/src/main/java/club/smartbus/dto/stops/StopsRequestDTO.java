@@ -1,6 +1,6 @@
 package club.smartbus.dto.stops;
 
-import club.smartbus.dto.routes.RouteRequest;
+import club.smartbus.dto.routes.RouteRequestDTO;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -13,7 +13,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
-public class StopsRequest {
+public class StopsRequestDTO {
 
     /**
      * A flag indicating whether a bus should be ordered.
@@ -26,5 +26,5 @@ public class StopsRequest {
      * This field encapsulates the route details that the request is associated with,
      * including origin and destination addresses.
      */
-    private RouteRequest routeRequest;
+    private RouteRequestDTO routeRequestDTO;
 }

@@ -1,6 +1,6 @@
 package club.smartbus.controller;
 
-import club.smartbus.dto.stations.StationsRequest;
+import club.smartbus.dto.stations.StationsRequestDTO;
 import club.smartbus.dto.transit.Station;
 import club.smartbus.service.BusService;
 import club.smartbus.utils.Constants;
@@ -29,10 +29,10 @@ public class BusController {
     private final BusService busService;
 
     /**
-     * Retrieves all bus stops for a given bus line based on the provided {@link StationsRequest}.
+     * Retrieves all bus stops for a given bus line based on the provided {@link StationsRequestDTO}.
      * The results are paginated, and the user can specify a start station and a stop station for filtering.
      *
-     * @param stationsRequest  Request object containing details like bus line number and agency.
+     * @param stationsRequestDTO  Request object containing details like bus line number and agency.
      * @param size             Optional parameter to specify the number of results per page (default: {@link Constants#DEFAULT_PAGE_SIZE}).
      * @param page             Optional parameter to specify the page number to retrieve (default: {@link Constants#DEFAULT_PAGE}).
      * @param startStation     Optional parameter to filter results by the starting station.
@@ -43,11 +43,11 @@ public class BusController {
             path = {"/stations"},
             produces = APPLICATION_JSON_VALUE)
     public Flux<Station> getAllStops(
-            @RequestBody StationsRequest stationsRequest,
+            @RequestBody StationsRequestDTO stationsRequestDTO,
             @RequestParam(name = "size", required = false, defaultValue = Constants.DEFAULT_PAGE_SIZE) int size,
             @RequestParam(name = "page", required = false, defaultValue = Constants.DEFAULT_PAGE) int page,
             @RequestParam(name = "startStation", required = false, defaultValue = "") String startStation,
             @RequestParam(name = "stopStation", required = false, defaultValue = "") String stopStation) {
-        return busService.getBusLineStations(stationsRequest, startStation, stopStation, size, page);
+        return busService.getBusLineStations(stationsRequestDTO, startStation, stopStation, size, page);
     }
 }

@@ -1,6 +1,6 @@
 package club.smartbus.service;
 
-import club.smartbus.dto.stations.StationsRequest;
+import club.smartbus.dto.stations.StationsRequestDTO;
 import club.smartbus.dal.LineStopRepository;
 import club.smartbus.data.LineStopEntity;
 import club.smartbus.dto.transit.LatLng;
@@ -41,7 +41,7 @@ public class BusServiceImpl implements BusService {
      *
      * <p>The method applies pagination based on the {@code size} and {@code page} parameters.</p>
      *
-     * @param stationsRequest the line number and agency name of the bus route.
+     * @param stationsRequestDTO the line number and agency name of the bus route.
      * @param startStation    the name of the start station (can be empty).
      * @param stopStation     the name of the stop station (can be empty).
      * @param size            the number of stations to return per page.
@@ -51,19 +51,19 @@ public class BusServiceImpl implements BusService {
      * @throws IllegalArgumentException if the start station is after the stop station.
      */
     @Override
-    public Flux<Station> getBusLineStations(StationsRequest stationsRequest, String startStation, String stopStation, int size, int page) {
+    public Flux<Station> getBusLineStations(StationsRequestDTO stationsRequestDTO, String startStation, String stopStation, int size, int page) {
         // Fetch all stations for the line number
-        return lineStopRepository.findLineStopEntitiesByLineNumber(stationsRequest.getLineNumber())
+        return lineStopRepository.findLineStopEntitiesByLineNumber(stationsRequestDTO.getLineNumber())
                 .collectList()
                 .flatMapMany(stopsList -> {
                     if (stopsList.isEmpty()) {
                         // If no stops are found, return a Flux error
-                        return Flux.error(new RuntimeException("No stations found for line number '" + stationsRequest.getLineNumber() + "'"));
+                        return Flux.error(new RuntimeException("No stations found for line number '" + stationsRequestDTO.getLineNumber() + "'"));
                     }
 
                     // Filter for stops of the requested agency
                     stopsList = stopsList.stream()
-                            .filter(station -> station.getAgencyName().equals(stationsRequest.getAgency()))
+                            .filter(station -> station.getAgencyName().equals(stationsRequestDTO.getAgency()))
                             .toList();
 
                     // Find the requested direction vector of stations

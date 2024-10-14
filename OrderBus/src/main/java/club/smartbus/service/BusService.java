@@ -1,6 +1,6 @@
 package club.smartbus.service;
 
-import club.smartbus.dto.stations.StationsRequest;
+import club.smartbus.dto.stations.StationsRequestDTO;
 import club.smartbus.dto.transit.LatLng;
 import club.smartbus.dto.transit.Station;
 import reactor.core.publisher.Flux;
@@ -17,14 +17,14 @@ public interface BusService {
      * Retrieves a paginated list of stations for a specific bus line based on the provided request.
      * The list can be filtered by the start and stop station names.
      *
-     * @param stationsRequest The request containing the bus line number and agency information.
+     * @param stationsRequestDTO The request containing the bus line number and agency information.
      * @param startStation    Optional parameter to filter the results by a starting station.
      * @param stopStation     Optional parameter to filter the results by a stop station.
      * @param size            The number of results to retrieve per page.
      * @param page            The page number to retrieve.
      * @return A reactive stream (Flux) of {@link Station} objects representing the bus line stations.
      */
-    Flux<Station> getBusLineStations(StationsRequest stationsRequest, String startStation, String stopStation, int size, int page);
+    Flux<Station> getBusLineStations(StationsRequestDTO stationsRequestDTO, String startStation, String stopStation, int size, int page);
 
     /**
      * Finds relevant bus lines that pass through both the start and end locations.

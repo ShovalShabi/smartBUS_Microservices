@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
-public class RouteRequest {
+public class RouteRequestDTO {
 
     /**
      * The address or location from where the journey will start.

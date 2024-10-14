@@ -14,7 +14,7 @@ import java.util.Map;
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
-public class RouteResponse {
+public class RouteResponseDTO {
 
     /**
      * The origin or starting point of the route.

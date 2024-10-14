@@ -1,7 +1,7 @@
 package club.smartbus.service;
 
-import club.smartbus.dto.stops.StopsRequest;
-import club.smartbus.dto.stops.StopsResponse;
+import club.smartbus.dto.stops.StopsRequestDTO;
+import club.smartbus.dto.stops.StopsResponseDTO;
 import club.smartbus.data.LineStopEntity;
 import reactor.core.publisher.Flux;
 
@@ -14,17 +14,17 @@ public interface StopService {
     /**
      * Retrieves a paginated list of bus stops based on the provided request details.
      *
-     * <p>This method processes the {@link StopsRequest} and returns the corresponding stops. The request
+     * <p>This method processes the {@link StopsRequestDTO} and returns the corresponding stops. The request
      * may include parameters like the bus line number, company, or stop filters to return the relevant data.</p>
      *
      * <p>The results are paginated based on the {@code size} and {@code page} parameters.</p>
      *
-     * @param stopsRequest the request containing filters for the bus stops.
+     * @param stopsRequestDTO the request containing filters for the bus stops.
      * @param size         the number of stops to return per page.
      * @param page         the page number to retrieve.
-     * @return a {@link Flux<StopsResponse>} containing the filtered and paginated list of bus stops.
+     * @return a {@link Flux< StopsResponseDTO >} containing the filtered and paginated list of bus stops.
      */
-    Flux<StopsResponse> getAll(StopsRequest stopsRequest, int size, int page);
+    Flux<StopsResponseDTO> getAll(StopsRequestDTO stopsRequestDTO, int size, int page);
 
     /**
      * Retrieves a paginated list of all bus stops, without any specific request filters.

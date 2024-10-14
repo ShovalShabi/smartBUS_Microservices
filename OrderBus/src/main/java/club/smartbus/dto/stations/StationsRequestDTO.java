@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
-public class StationsRequest {
+public class StationsRequestDTO {
 
     /**
      * The bus line number for which the station information is requested.

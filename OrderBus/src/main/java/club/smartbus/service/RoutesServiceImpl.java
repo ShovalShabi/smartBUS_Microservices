@@ -1,7 +1,7 @@
 package club.smartbus.service;
 
-import club.smartbus.dto.routes.RouteResponse;
-import club.smartbus.dto.stops.StopsRequest;
+import club.smartbus.dto.routes.RouteResponseDTO;
+import club.smartbus.dto.stops.StopsRequestDTO;
 import club.smartbus.dto.transit.Station;
 import club.smartbus.dto.transit.TransitDetails;
 import club.smartbus.utils.Constants;
@@ -47,19 +47,19 @@ public class RoutesServiceImpl implements RoutesService {
      * to the corresponding transit details in the route response.</p>
      *
      * <ul>
-     *   <li>Fetch route details using the {@link #fetchRoutes(StopsRequest)} method.</li>
+     *   <li>Fetch route details using the {@link #fetchRoutes(StopsRequestDTO)} method.</li>
      *   <li>Convert the transit details from a {@code Map<String, Object>} to a {@code List<TransitDetails>}.</li>
      *   <li>For each transit detail, retrieve the intermediate stations using the {@link #getStationsBetweenInTransit(String, String, String)} method.</li>
      *   <li>Update the transit details with the intermediate stations.</li>
      *   <li>Return the updated route response with the intermediate stations.</li>
      * </ul>
      *
-     * @param stopsRequest the request containing information about the stops for which routes need to be fetched.
-     * @return a {@link Flux<RouteResponse>} containing the route details with intermediate stations included.
+     * @param stopsRequestDTO the request containing information about the stops for which routes need to be fetched.
+     * @return a {@link Flux< RouteResponseDTO >} containing the route details with intermediate stations included.
      */
     @Override
-    public Flux<RouteResponse> getRoutesWithIntermediateStations(StopsRequest stopsRequest) {
-        return fetchRoutes(stopsRequest)
+    public Flux<RouteResponseDTO> getRoutesWithIntermediateStations(StopsRequestDTO stopsRequestDTO) {
+        return fetchRoutes(stopsRequestDTO)
                 .flatMap(response -> {
                     // Convert the transit details from Map<String, Object> to List<TransitDetails>
                     List<TransitDetails> transitDetails = objectMapper.convertValue(
@@ -97,22 +97,22 @@ public class RoutesServiceImpl implements RoutesService {
      * Fetches routes based on the provided stops request by sending a POST request to an external service.
      *
      * <p>This method sends a request using WebClient to fetch route details and processes the response
-     * into a {@link Flux<RouteResponse>}.</p>
+     * into a {@link Flux< RouteResponseDTO >}.</p>
      *
      * <p>Logging is performed to track the start, completion, and any errors that occur during the request.</p>
      *
-     * @param stopsRequest the request containing route information to be fetched.
-     * @return a {@link Flux<RouteResponse>} containing the route details.
+     * @param stopsRequestDTO the request containing route information to be fetched.
+     * @return a {@link Flux< RouteResponseDTO >} containing the route details.
      */
-    private Flux<RouteResponse> fetchRoutes(StopsRequest stopsRequest) {
-        log.info("Fetching routes for stops: {}", stopsRequest);
+    private Flux<RouteResponseDTO> fetchRoutes(StopsRequestDTO stopsRequestDTO) {
+        log.info("Fetching routes for stops: {}", stopsRequestDTO);
 
         try {
             return webClientBuilder.build()
                     .post()
-                    .bodyValue(stopsRequest.getRouteRequest())
+                    .bodyValue(stopsRequestDTO.getRouteRequestDTO())
                     .retrieve()
-                    .bodyToFlux(RouteResponse.class)
+                    .bodyToFlux(RouteResponseDTO.class)
                     .doOnError(error -> log.error("Error fetching routes: {}", error.getMessage()))
                     .doOnComplete(() -> log.info("Route fetching completed"));
         } catch (Exception e) {
