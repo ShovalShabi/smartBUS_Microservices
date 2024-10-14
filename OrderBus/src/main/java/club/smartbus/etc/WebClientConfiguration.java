@@ -1,4 +1,4 @@
-package club.smartbus.api;
+package club.smartbus.etc;
 
 import club.smartbus.utils.Constants;
 import org.springframework.beans.factory.annotation.Value;
