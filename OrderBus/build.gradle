@@ -63,6 +63,15 @@ dependencies {
 
     implementation 'jakarta.persistence:jakarta.persistence-api:3.0.0'
 
+    // Spring Boot Starter Security for authentication and authorization in WebFlux
+    implementation 'org.springframework.boot:spring-boot-starter-security'
+
+    // For testing security-related configurations
+    testImplementation 'org.springframework.security:spring-security-test'
+
+    // H2 Database for testing and development
+    implementation 'com.h2database:h2'
+
     // PostgreSQL JDBC driver for runtime
     runtimeOnly 'org.postgresql:postgresql'
 
@@ -86,4 +95,5 @@ dependencies {
 // Configure test task to use JUnit Platform
 tasks.named('test') {
     useJUnitPlatform()
+    jvmArgs += ['-Xshare:off'] // Disable class data sharing to suppress warning
 }
