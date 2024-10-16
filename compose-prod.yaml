@@ -1,7 +1,7 @@
-# Docker Compose Configuration for PostgreSQL, Redis, and Microservices
+# Docker Compose Configuration for PostgreSQL, Redis, and Microservices (Production Environment)
 
 services:
-  # PostgreSQL container (slimmed down)
+  # PostgresSQL container (production)
   PostgresContainer:
     container_name: smartbus-prod-PostgresContainer
     image: postgres:14-alpine
@@ -13,6 +13,8 @@ services:
     volumes:
       - postgres-data-prod:/var/lib/postgresql/data
       - ./db-init:/docker-entrypoint-initdb.d
+    networks:
+      - smartbus-net
 
   # Auth service (prod)
   auth-prod:
@@ -27,6 +29,8 @@ services:
       - "10000:10000"
     depends_on:
       - PostgresContainer
+    networks:
+      - smartbus-net
 
   # Feedback service (prod)
   feedback-prod:
@@ -41,17 +45,17 @@ services:
       - "10050:10050"
     depends_on:
       - PostgresContainer
+    networks:
+      - smartbus-net
 
-  # GTFS service
+  # GTFS service (prod)
   gtfs:
     container_name: smartbus-prod-GTFS
     build:
       context: ./GTFS
       dockerfile: Dockerfile
-      args:
-        PROFILE: prod
     volumes:
-      - ./GTFS/prod/public:/app/GtfsScript/public # Mounting public folder for GTFS data
+      - ./GTFS/prod/public:/app/GtfsScript/public  # Mounting public folder for GTFS data
       - type: bind
         source: ./GTFS/prod/config.yaml
         target: /app/GtfsScript/config/config.yaml
@@ -62,7 +66,9 @@ services:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=12683579
     ports:
-      - "9000:9000" # Or the port you need to expose for GTFS
+      - "9000:9000"
+    networks:
+      - smartbus-net
 
   # OrderBus service (prod)
   orderbus-prod:
@@ -72,7 +78,7 @@ services:
       dockerfile: Dockerfile
     environment:
       - SPRING_PROFILES_ACTIVE=prod
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://PostgresContainer:5432/gtfs
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://PostgresContainer:5432/GTFSProd
     ports:
       - "10093:10093"
     depends_on:
@@ -80,6 +86,8 @@ services:
       - gtfs
       - routes-prod
       - RedisContainer
+    networks:
+      - smartbus-net
 
   # Routes service (prod)
   routes-prod:
@@ -91,8 +99,10 @@ services:
       - SPRING_PROFILES_ACTIVE=prod
     ports:
       - "10094:10094"
+    networks:
+      - smartbus-net
 
-  # Redis container (slimmed down)
+  # Redis container (production)
   RedisContainer:
     container_name: smartbus-prod-RedisContainer
     image: redis:7-alpine
@@ -100,25 +110,30 @@ services:
       - "6379:6379" # Redis default port
     volumes:
       - redis-data-prod:/data
+    networks:
+      - smartbus-net
 
-
-  # Add the Nginx service for production
+  # Nginx service for production
   nginx:
     container_name: smartbus-prod-nginx
     image: nginx:latest
     ports:
       - "8080:8080" # Exposing port 8080
     volumes:
-      - ./nginx/nginx-prod.conf:/etc/nginx/nginx.conf # Mounting prod configuration
+      - ./nginx/nginx-prod.conf:/etc/nginx/nginx.conf:ro  # Mount prod configuration as read-only
     depends_on:
       - auth-prod
       - feedback-prod
-      - gtfs
       - orderbus-prod
       - routes-prod
     networks:
       - smartbus-net
 
+# Define the network
+networks:
+  smartbus-net:
+    driver: bridge
+    name: smartbus-net
 
 volumes:
   postgres-data-prod:

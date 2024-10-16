@@ -133,6 +133,7 @@ services:
 networks:
   smartbus-net:
     driver: bridge
+    name: smartbus-net
 
 volumes:
   postgres-data-dev:
