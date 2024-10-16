@@ -26,6 +26,7 @@ public class SecurityConfig {
                 // Configure authorization rules for different endpoints
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/notification-service/**").permitAll()  // Allow WebSocket connections without authentication
+                        .requestMatchers("/bus/**").permitAll()  // Allow public access to /bus/ endpoints
                         .anyRequest().authenticated()  // All other requests need authentication
                 )
                 // Enable basic authentication using the new lambda style
