@@ -13,6 +13,8 @@ services:
     volumes:
       - postgres-data-dev:/var/lib/postgresql/data
       - ./db-init:/docker-entrypoint-initdb.d
+    networks:
+      - smartbus-net
 
   # Auth service (dev)
   auth-dev:
@@ -27,6 +29,8 @@ services:
       - "3804:3804"
     depends_on:
       - PostgresContainer
+    networks:
+      - smartbus-net
 
   # Feedback service (dev)
   feedback-dev:
@@ -41,6 +45,8 @@ services:
       - "5003:5003"
     depends_on:
       - PostgresContainer
+    networks:
+      - smartbus-net
 
   # GTFS service (dev)
   gtfs:
@@ -48,8 +54,6 @@ services:
     build:
       context: ./GTFS
       dockerfile: Dockerfile
-      args:
-        PROFILE: dev
     volumes:
       - ./GTFS/dev/public:/app/GtfsScript/public # Mounting public folder for GTFS data
       - type: bind
@@ -63,11 +67,8 @@ services:
       - POSTGRES_PASSWORD=12683579
     ports:
       - "8000:8000"
-    deploy:
-      resources:
-        limits:
-          cpus: "4.0"
-          memory: 6G
+    networks:
+      - smartbus-net
 
   # OrderBus service (dev)
   orderbus-dev:
@@ -85,6 +86,8 @@ services:
       - gtfs
       - routes-dev
       - RedisContainer
+    networks:
+      - smartbus-net
 
   # Routes service (dev)
   routes-dev:
@@ -96,15 +99,40 @@ services:
       - SPRING_PROFILES_ACTIVE=dev
     ports:
       - "6924:6924"
+    networks:
+      - smartbus-net
 
   # Redis container (development)
   RedisContainer:
     container_name: smartbus-dev-RedisContainer
     image: redis:7-alpine
     ports:
-      - "6379:6379" # Redis default port
+      - "6379:6379"
     volumes:
       - redis-data-dev:/data
+    networks:
+      - smartbus-net
+
+  # Nginx service for development
+  nginx:
+    container_name: smartbus-dev-nginx
+    image: nginx:alpine
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./nginx/nginx-dev.conf:/etc/nginx/nginx.conf:ro  # Mount as read-only
+    depends_on:
+      - auth-dev
+      - feedback-dev
+      - orderbus-dev
+      - routes-dev
+    networks:
+      - smartbus-net
+
+# Define the network
+networks:
+  smartbus-net:
+    driver: bridge
 
 volumes:
   postgres-data-dev:

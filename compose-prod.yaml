@@ -101,6 +101,25 @@ services:
     volumes:
       - redis-data-prod:/data
 
+
+  # Add the Nginx service for production
+  nginx:
+    container_name: smartbus-prod-nginx
+    image: nginx:latest
+    ports:
+      - "8080:8080" # Exposing port 8080
+    volumes:
+      - ./nginx/nginx-prod.conf:/etc/nginx/nginx.conf # Mounting prod configuration
+    depends_on:
+      - auth-prod
+      - feedback-prod
+      - gtfs
+      - orderbus-prod
+      - routes-prod
+    networks:
+      - smartbus-net
+
+
 volumes:
   postgres-data-prod:
   redis-data-prod:
