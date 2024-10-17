@@ -3,7 +3,7 @@ package club.smartbus.service.websocket;
 import club.smartbus.dto.transit.LatLng;
 import club.smartbus.dto.websocket.DriverWSMessage;
 import club.smartbus.dto.websocket.PassengerWSMessage;
-import club.smartbus.service.BusService;
+import club.smartbus.service.bus.BusService;
 import club.smartbus.utils.WebSocketOptions;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AllArgsConstructor;

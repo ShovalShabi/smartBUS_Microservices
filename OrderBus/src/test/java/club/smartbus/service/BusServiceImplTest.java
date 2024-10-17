@@ -5,6 +5,7 @@ import club.smartbus.data.LineStopEntity;
 import club.smartbus.dto.stations.StationsRequestDTO;
 import club.smartbus.dto.transit.LatLng;
 import club.smartbus.dto.transit.Station;
+import club.smartbus.service.bus.BusServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
