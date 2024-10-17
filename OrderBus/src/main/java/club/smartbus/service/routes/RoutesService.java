@@ -1,4 +1,4 @@
-package club.smartbus.service;
+package club.smartbus.service.routes;
 
 import club.smartbus.dto.routes.RouteResponseDTO;
 import club.smartbus.dto.stops.StopsRequestDTO;
