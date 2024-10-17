@@ -20,7 +20,7 @@ public class WebClientConfiguration {
      * The base URL for the OrderBus client, injected from the application properties.
      * This value is specified in the application's configuration files (application.properties or application.yml).
      */
-    @Value("${client.orderbus}")
+    @Value("${spring.config.client.orderbus}")
     private String orderBusUrl;
 
     /**
