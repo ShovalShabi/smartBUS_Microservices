@@ -3,7 +3,7 @@ package club.smartbus.controller;
 import club.smartbus.dto.stations.StationsRequestDTO;
 import club.smartbus.dto.transit.Station;
 import club.smartbus.etc.TestSecurityConfig;
-import club.smartbus.service.BusService;
+import club.smartbus.service.bus.BusService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.MockitoAnnotations;

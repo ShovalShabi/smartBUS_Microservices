@@ -1,4 +1,4 @@
-package club.smartbus.service;
+package club.smartbus.service.bus;
 
 import club.smartbus.dto.stations.StationsRequestDTO;
 import club.smartbus.dto.transit.LatLng;
