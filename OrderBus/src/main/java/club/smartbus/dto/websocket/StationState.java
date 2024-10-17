@@ -22,6 +22,13 @@ public class StationState {
      */
     private Station data;
 
+
+    /**
+     * A flag indicating whether the station is active.
+     * If {@code true}, the station has passenger requesting a ride; otherwise, there is no need to stop at the station.
+     */
+    private Boolean active;
+
     /**
      * A flag indicating whether the station has been visited.
      * If {@code true}, the station has already been visited; otherwise, it has not been visited.
