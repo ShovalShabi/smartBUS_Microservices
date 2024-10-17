@@ -2,7 +2,7 @@ package club.smartbus.controller;
 
 import club.smartbus.dto.stops.StopsRequestDTO;
 import club.smartbus.dto.stops.StopsResponseDTO;
-import club.smartbus.service.StopService;
+import club.smartbus.service.stop.StopService;
 import club.smartbus.utils.Constants;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
