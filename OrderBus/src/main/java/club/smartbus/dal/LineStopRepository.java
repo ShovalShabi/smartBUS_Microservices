@@ -49,14 +49,16 @@ public interface LineStopRepository extends ReactiveCrudRepository<LineStopEntit
      *
      * <p><strong>Query:</strong></p>
      * <pre>
-     * SELECT * FROM line_stops WHERE ROUND(lat, 3) = :lat AND ROUND(lng, 3) = :lng
+     * SELECT * FROM line_stops WHERE round(lat::numeric, 3)::double precision = round(:lat::numeric, 3)::double precision AND
+     *  round(lng::numeric, 3)::double precision = round(:lng::numeric, 3)::double precision
      * </pre>
      *
      * @param lat The latitude of the bus stop location, rounded to 3 decimal places.
      * @param lng The longitude of the bus stop location, rounded to 3 decimal places.
      * @return A Flux of {@link LineStopEntity} objects representing the bus stops at the specified rounded location.
      */
-    @Query("SELECT * FROM line_stops WHERE ROUND(lat, 3) = :lat AND ROUND(lng, 3) = :lng")
+    @Query("SELECT * FROM line_stops WHERE round(lat::numeric, 3)::double precision = round(:lat::numeric, 3)::double precision AND " +
+            "round(lng::numeric, 3)::double precision = round(:lng::numeric, 3)::double precision")
     Flux<LineStopEntity> findByLineNumbersByStationLocation(double lat, double lng);
 
     /**
@@ -67,13 +69,15 @@ public interface LineStopRepository extends ReactiveCrudRepository<LineStopEntit
      *
      * <p><strong>Query:</strong></p>
      * <pre>
-     * SELECT stop_name FROM line_stops WHERE ROUND(lat, 3) = :lat AND ROUND(lng, 3) = :lng
+     * SELECT DISTINCT stop_name FROM line_stops WHERE round(lat::numeric, 3)::double precision = round(:lat::numeric, 3)::double precision AND
+     * round(lng::numeric, 3)::double precision = round(:lng::numeric, 3)::double precision
      * </pre>
      *
      * @param lat The latitude of the bus stop, rounded to 3 decimal places.
      * @param lng The longitude of the bus stop, rounded to 3 decimal places.
      * @return A Mono of String representing the stop name at the specified location, or an empty Mono if no match is found.
      */
-    @Query("SELECT stop_name FROM line_stops WHERE ROUND(lat, 3) = :lat AND ROUND(lng, 3) = :lng")
+    @Query("SELECT DISTINCT stop_name FROM line_stops WHERE round(lat::numeric, 3)::double precision = round(:lat::numeric, 3)::double precision AND " +
+            "round(lng::numeric, 3)::double precision = round(:lng::numeric, 3)::double precision")
     Mono<String> findStationNameByLatitudeAndLongitude(double lat, double lng);
 }
