@@ -27,5 +27,10 @@ public enum WebSocketOptions {
      * Represents the option for updating the driver's current route step.
      * This option is used when a driver sends an update about their current position or progress along the route.
      */
-    UPDATE_ROUTE_STEP
+    UPDATE_ROUTE_STEP,
+
+    /**
+     * Represents an option for pinging the server for keep the connection open and preventing it of being closed.
+     */
+    KEEP_ALIVE
 }
