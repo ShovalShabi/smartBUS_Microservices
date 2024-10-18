@@ -1,11 +1,12 @@
 package club.smartbus.dto.websocket;
 
+import club.smartbus.dto.transit.LatLng;
 import club.smartbus.utils.WebSocketOptions;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.web.socket.WebSocketMessage;
-import club.smartbus.dto.transit.LatLng;
 
 import java.util.List;
 
@@ -17,7 +18,7 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class DriverWSMessage implements WebSocketMessage<String> {
+public class DriverWSMessage implements OrderBusWSMessage {
 
     /**
      * The name of the transportation agency operating the line.
@@ -33,7 +34,7 @@ public class DriverWSMessage implements WebSocketMessage<String> {
      * The target station for the ride, represented by its latitude and longitude.
      * This field is mostly null and is only populated when accepting or canceling a ride.
      */
-    private LatLng targetStation; // Mostly Null, will be valid on for accepting ride or cancelling ride
+    private LatLng targetStation; // Mostly Null, will be valid only for accepting or canceling a ride
 
     /**
      * A list of stations that are listening to WebSocket updates, represented by their state.
@@ -64,23 +65,14 @@ public class DriverWSMessage implements WebSocketMessage<String> {
     }
 
     /**
-     * Returns the length of the payload in the WebSocket message.
+     * Converts this object to a JSON string using Jackson's ObjectMapper.
      *
-     * @return The length of the payload as an integer.
+     * @return A JSON string representing the current state of this object.
+     * @throws JsonProcessingException If an error occurs during serialization.
      */
     @Override
-    public int getPayloadLength() {
-        return payload.length();
-    }
-
-    /**
-     * Indicates whether this is the last message in a WebSocket sequence.
-     * Since each message is sent independently, this method always returns true.
-     *
-     * @return {@code true} as each message is considered the last in the sequence.
-     */
-    @Override
-    public boolean isLast() {
-        return true; // We will always send one message at a time so every one message is the last
+    public String toJSONString() throws JsonProcessingException {
+        ObjectMapper objectMapper = new ObjectMapper();
+        return objectMapper.writeValueAsString(this);
     }
 }

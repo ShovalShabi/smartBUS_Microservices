@@ -2,10 +2,11 @@ package club.smartbus.dto.websocket;
 
 import club.smartbus.dto.transit.LatLng;
 import club.smartbus.utils.WebSocketOptions;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.web.socket.WebSocketMessage;
 
 /**
  * Represents a WebSocket message sent by a passenger, containing details such as the start and end locations,
@@ -15,7 +16,7 @@ import org.springframework.web.socket.WebSocketMessage;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class PassengerWSMessage implements WebSocketMessage<String> {
+public class PassengerWSMessage implements OrderBusWSMessage {
 
     /**
      * The start location of the passenger, represented by latitude and longitude.
@@ -38,23 +39,14 @@ public class PassengerWSMessage implements WebSocketMessage<String> {
     private String payload;
 
     /**
-     * Returns the length of the payload in the WebSocket message.
+     * Converts this {@link PassengerWSMessage} object to its JSON string representation.
      *
-     * @return The length of the payload as an integer.
+     * @return A JSON string representation of this {@link PassengerWSMessage}.
+     * @throws JsonProcessingException if an error occurs while serializing the object to JSON.
      */
     @Override
-    public int getPayloadLength() {
-        return payload.length();
-    }
-
-    /**
-     * Indicates whether this is the last message in the WebSocket sequence.
-     * In the case of passenger messages, multiple messages may be sent in sequence, so this method returns false.
-     *
-     * @return {@code false} since multiple messages may be sent in sequence.
-     */
-    @Override
-    public boolean isLast() {
-        return false;
+    public String toJSONString() throws JsonProcessingException {
+        ObjectMapper objectMapper = new ObjectMapper();
+        return objectMapper.writeValueAsString(this);
     }
 }
