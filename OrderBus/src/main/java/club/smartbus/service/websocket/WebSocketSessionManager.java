@@ -2,8 +2,10 @@ package club.smartbus.service.websocket;
 
 import club.smartbus.dto.transit.LatLng;
 import club.smartbus.dto.websocket.DriverWSMessage;
+import club.smartbus.dto.websocket.OrderBusWSMessage;
 import club.smartbus.dto.websocket.PassengerWSMessage;
 import club.smartbus.utils.Constants;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -98,32 +100,43 @@ public class WebSocketSessionManager {
      * The message is retried a fixed number of times in case of failure.
      *
      * @param session    The {@link WebSocketSession} to send the message to.
-     * @param message    The {@link WebSocketMessage} to be sent (either {@link PassengerWSMessage} or {@link DriverWSMessage}).
+     * @param message    The {@link OrderBusWSMessage} to be sent (either {@link PassengerWSMessage} or {@link DriverWSMessage}).
      * @param clientType The type of client sending the message: "OrderBusClient" for passengers or "DriverConsole" for drivers.
      */
-    public void sendMessage(WebSocketSession session, WebSocketMessage message, String clientType) {
-        if (session != null && session.isOpen()) {
-            TextMessage textMessage = null;
-            switch (clientType) {
-                case "OrderBusClient" -> {
-                    PassengerWSMessage passengerWSMessage = (PassengerWSMessage) message;
-                    textMessage = new TextMessage(passengerWSMessage.getPayload());
+    public void sendMessage(WebSocketSession session, OrderBusWSMessage message, String clientType) {
+        try {
+            if (session != null && session.isOpen()) {
+                TextMessage textMessage = null;
+                switch (clientType) {
+                    case "OrderBusClient" -> {
+                        PassengerWSMessage passengerWSMessage = (PassengerWSMessage) message;
+                        textMessage = new TextMessage(passengerWSMessage.toJSONString());
+                    }
+                    case "DriverConsole" -> {
+                        DriverWSMessage driverWSMessage = (DriverWSMessage) message;
+                        textMessage = new TextMessage(driverWSMessage.toJSONString());
+                    }
                 }
-                case "DriverConsole" -> {
-                    DriverWSMessage driverWSMessage = (DriverWSMessage) message;
-                    textMessage = new TextMessage(driverWSMessage.getPayload());
-                }
-            }
-            if (textMessage == null)
-                return;
 
-            boolean success = sendMessageWithRetry(session, textMessage);
-            if (!success) {
-                log.error("Failed to send message to session {} after {} attempts", session.getId(), Constants.MAX_RETRIES);
-                closeSessionAndRemovePayload(session); // Close session if message sending fails
+                if (textMessage == null) {
+                    log.warn("Message for session {} is null, nothing to send", session.getId());
+                    return;
+                }
+
+                boolean success = sendMessageWithRetry(session, textMessage);
+                if (!success) {
+                    log.error("Failed to send message to session {} after {} attempts", session.getId(), Constants.MAX_RETRIES);
+                    closeSessionAndRemovePayload(session); // Close session if message sending fails
+                }
+            } else {
+                log.error("Attempted to send a message to a session that is not open or does not exist");
             }
-        } else {
-            log.error("Attempted to send a message to a session that is not open or does not exist");
+        } catch (JsonProcessingException e) {
+            log.error("Error serializing message for client type {} in session {}: {}", clientType, session.getId(), e.getMessage());
+            closeSessionAndRemovePayload(session); // Close session if serialization fails
+        } catch (Exception e) {
+            log.error("Unexpected error occurred while sending message to session {}: {}", session.getId(), e.getMessage());
+            closeSessionAndRemovePayload(session); // Close session for any other errors
         }
     }
 
