@@ -2,6 +2,7 @@ package club.smartbus.service.websocket;
 
 import club.smartbus.dto.transit.LatLng;
 import club.smartbus.dto.websocket.DriverWSMessage;
+import club.smartbus.dto.websocket.OrderBusWSMessage;
 import club.smartbus.dto.websocket.PassengerWSMessage;
 import club.smartbus.service.bus.BusService;
 import club.smartbus.utils.WebSocketOptions;
@@ -101,6 +102,8 @@ public class BusWebSocketHandler implements WebSocketHandler {
 
         switch (passengerWSMessage.getOption()) {
             case REQUEST_BUS -> {
+                log.info("Passenger {} attempt to request a bus from {} to {} ...",
+                        session.getId(), passengerWSMessage.getStartLocation(), passengerWSMessage.getEndLocation());
                 // Store the passenger's message in Redis
                 sessionManager.setDataPayload(passengerWSMessage, session);
 
@@ -155,6 +158,9 @@ public class BusWebSocketHandler implements WebSocketHandler {
 
                 log.info("Passenger {} canceled their ride from {}. Cancellation message broadcast to relevant drivers.",
                         session.getId(), passengerWSMessage.getStartLocation());
+            }
+            case KEEP_ALIVE -> {
+                log.info("Passenger's session pinged the server {}", session.getId());
             }
             default -> log.error("Unknown message option from OrderBusClient with session: {}", session.getId());
         }
@@ -232,10 +238,10 @@ public class BusWebSocketHandler implements WebSocketHandler {
      * Broadcasts a WebSocket message to a list of WebSocket sessions.
      *
      * @param sessions   the list of {@link WebSocketSession} to send the message to.
-     * @param message    the {@link WebSocketMessage} to be broadcast (either {@link PassengerWSMessage} or {@link DriverWSMessage}).
+     * @param message    the {@link OrderBusWSMessage} to be broadcast (either {@link PassengerWSMessage} or {@link DriverWSMessage}).
      * @param clientType the type of client sending the message: "OrderBusClient" for passengers or "DriverConsole" for drivers.
      */
-    public void broadcastMessage(List<WebSocketSession> sessions, WebSocketMessage message, String clientType) {
+    public void broadcastMessage(List<WebSocketSession> sessions, OrderBusWSMessage message, String clientType) {
         for (WebSocketSession session : sessions) {
             sessionManager.sendMessage(session, message, clientType);
         }
