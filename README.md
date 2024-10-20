@@ -51,8 +51,8 @@ Ensure Docker is running on your machine before proceeding with the Docker setup
 ### Step 2: Clone the Project
 
 ```bash
-git clone https://github.com/ShovalShabi/smartBUS.git
-cd smartBUS
+git clone https://github.com/ShovalShabi/smartBUS_Microservices.git
+cd smartBUS_Microservices
 ```
 
 ### Step 3: Open the Project in IntelliJ IDEA
