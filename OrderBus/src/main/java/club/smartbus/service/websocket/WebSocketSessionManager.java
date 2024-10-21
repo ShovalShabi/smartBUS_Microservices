@@ -12,7 +12,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.TextMessage;
-import org.springframework.web.socket.WebSocketMessage;
 import org.springframework.web.socket.WebSocketSession;
 
 import java.io.IOException;
@@ -202,8 +201,8 @@ public class WebSocketSessionManager {
                 .filter(entry -> relevantBusLines.contains(entry.getValue().getLineNumber())) // Check if line number is relevant
                 .filter(entry -> entry.getValue().getListenersStations().stream()
                         .anyMatch(stationState -> stationState.getData().getLocation().getLatLng().equals(stationLocation))) // Check if stationLocation is in listeners
-                .filter(entry -> entry.getValue().getVisitedStations().stream()
-                        .noneMatch(stationState -> stationState.getData().getLocation().getLatLng().equals(stationLocation))) // Check if station has not been visited
+                .filter(entry -> entry.getValue().computeUnvisitedStations().stream()
+                        .anyMatch(stationState -> stationState.getData().getLocation().getLatLng().equals(stationLocation))) // Check if station has not been visited
                 .map(entry -> sessionMap.get(entry.getKey())) // Retrieve WebSocketSession from sessionMap using sessionId
                 .filter(Objects::nonNull) // Ensure session is not null
                 .collect(Collectors.toList()); // Collect the valid WebSocket sessions
