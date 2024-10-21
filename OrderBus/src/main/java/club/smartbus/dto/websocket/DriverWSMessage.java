@@ -57,7 +57,7 @@ public class DriverWSMessage implements OrderBusWSMessage {
      *
      * @return A list of stations that have not been visited.
      */
-    public List<StationState> getVisitedStations() {
+    public List<StationState> computeUnvisitedStations() {
         return listenersStations
                 .stream()
                 .filter(stationState -> !stationState.getVisited())
