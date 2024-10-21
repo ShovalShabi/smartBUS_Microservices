@@ -113,6 +113,9 @@ public class BusWebSocketHandler implements WebSocketHandler {
                         .collect(Collectors.toSet())
                         .block();  // Block to wait for the result
 
+                log.info("Relevant bus lines for passenger request: {}", relevantBusLines);
+
+
                 // Retrieve the station name for broadcasting
                 String stationName = busService
                         .findStationNameByLatitudeAndLongitude(passengerWSMessage
@@ -123,9 +126,15 @@ public class BusWebSocketHandler implements WebSocketHandler {
                 List<WebSocketSession> driverSessions = sessionManager
                         .getListOfDriverSessionsByBusLinesAndStation(relevantBusLines, passengerWSMessage.getStartLocation());
 
+                log.info("Available sessions to the passengers request: {}", driverSessions);
+
+
                 // Create the message to broadcast to drivers
                 String messageText = String.format("A passenger in %s is waiting for a pick-up, approve?", stationName);
-                PassengerWSMessage broadcastMessage = new PassengerWSMessage(null, null, WebSocketOptions.REQUEST_BUS, messageText);
+                PassengerWSMessage broadcastMessage = new PassengerWSMessage(passengerWSMessage.getStartLocation(),
+                        passengerWSMessage.getEndLocation(),
+                        WebSocketOptions.REQUEST_BUS,
+                        messageText);
 
                 // Broadcast the message to relevant drivers
                 broadcastMessage(driverSessions, broadcastMessage, "OrderBusClient");
@@ -151,7 +160,10 @@ public class BusWebSocketHandler implements WebSocketHandler {
 
                 // Create the cancellation message to broadcast to drivers
                 String messageText = String.format("A passenger in %s has canceled their ride", stationName);
-                PassengerWSMessage cancellationMessage = new PassengerWSMessage(null, null, WebSocketOptions.CANCELING_RIDE, messageText);
+                PassengerWSMessage cancellationMessage = new PassengerWSMessage(passengerWSMessage.getStartLocation(),
+                        passengerWSMessage.getEndLocation(),
+                        WebSocketOptions.CANCELING_RIDE,
+                        messageText);
 
                 // Broadcast the cancellation message to relevant drivers
                 broadcastMessage(driverSessions, cancellationMessage, "OrderBusClient");
@@ -187,7 +199,7 @@ public class BusWebSocketHandler implements WebSocketHandler {
                 // Create the message to broadcast
                 String messageText = String.format("Bus from %s with line number %s is heading your way",
                         driverWSMessage.getAgency(), driverWSMessage.getLineNumber());
-                PassengerWSMessage broadcastMessage = new PassengerWSMessage(null, null,
+                PassengerWSMessage broadcastMessage = new PassengerWSMessage(driverWSMessage.getTargetStation(), null,
                         WebSocketOptions.ACCEPTING_RIDE, messageText);
 
                 // Broadcast message to relevant passengers
@@ -211,7 +223,7 @@ public class BusWebSocketHandler implements WebSocketHandler {
                 // Create the cancellation message to broadcast
                 String messageText = String.format("Bus from %s with line number %s could not pick you up",
                         driverWSMessage.getAgency(), driverWSMessage.getLineNumber());
-                PassengerWSMessage cancellationMessage = new PassengerWSMessage(null, null,
+                PassengerWSMessage cancellationMessage = new PassengerWSMessage(driverWSMessage.getTargetStation(), null,
                         WebSocketOptions.CANCELING_RIDE, messageText);
 
                 // Broadcast cancellation message to relevant passengers
